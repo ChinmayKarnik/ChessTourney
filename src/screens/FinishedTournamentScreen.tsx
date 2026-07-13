@@ -3,17 +3,26 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { DatabaseController } from '../data/controllers';
+import { setLatestDataForTournament } from '../utils/tournamentUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FinishedTournament'>;
 
 export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
-  const [tournament, setTournament] = useState<any>(null);
+  const [tournament, setTournament] = useState<any>(() =>
+    DatabaseController.getInstance()
+      .getTournaments()
+      .find(t => t.id === route.params.tournamentId),
+  );
 
   useEffect(() => {
-    const found = DatabaseController.getInstance()
-      .getTournaments()
-      .find(t => t.id === route.params.tournamentId);
-    setTournament(found ?? null);
+    (async () => {
+      await setLatestDataForTournament(route.params.tournamentId);
+      setTournament(
+        DatabaseController.getInstance()
+          .getTournaments()
+          .find(t => t.id === route.params.tournamentId),
+      );
+    })();
   }, [route.params.tournamentId]);
 
   if (!tournament) {
@@ -49,14 +58,23 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
       <View style={styles.leaderboard}>
         {leaderboard.map(
           (entry: { player: string; points: number; rating?: number }, i: number) => (
-            <View key={entry.player} style={styles.row}>
+            <TouchableOpacity
+              key={entry.player}
+              style={styles.row}
+              onPress={() =>
+                navigation.navigate('PlayerMatches', {
+                  player: entry.player,
+                  matches: matches[entry.player] ?? [],
+                })
+              }
+            >
               <Text style={styles.rank}>{i + 1}.</Text>
               <Text style={styles.player}>
                 {entry.player}
                 {entry.rating ? ` (${entry.rating})` : ''}
               </Text>
               <Text style={styles.wins}>{entry.points}</Text>
-            </View>
+            </TouchableOpacity>
           ),
         )}
       </View>

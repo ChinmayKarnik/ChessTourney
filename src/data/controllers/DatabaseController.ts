@@ -7,16 +7,7 @@ class DatabaseController {
   private static instance: DatabaseController;
 
   private username: string = '';
-  private tournaments: any[] = [
-    {
-      id: DatabaseController.generateId(),
-      players: ['BlindFork', 'kkr19', 'rajjayavant', 'Harshb20000'],
-      startTime: 1783940820000, // July 13, 2026 4:37 PM
-      duration: 1 * 60 * 60 * 1000, // 1 hour
-      initTime: 3 * 60 * 1000, // 3 minutes
-      increment: 1 * 1000, // 1 second
-    },
-  ];
+  private tournaments: any[] = [];
 
   static getInstance(): DatabaseController {
     if (!DatabaseController.instance) {
@@ -75,18 +66,7 @@ class DatabaseController {
   async loadTournaments(): Promise<any[]> {
     try {
       const stored = await AsyncStorage.getItem(TOURNAMENTS_STORAGE_KEY);
-      this.tournaments = stored
-        ? JSON.parse(stored)
-        : [
-            {
-              id: DatabaseController.generateId(),
-              players: ['BlindFork', 'kkr19', 'rajjayavant', 'Harshb20000'],
-              startTime: 1783940820000, // July 13, 2026 4:37 PM
-              duration: 1 * 60 * 60 * 1000, // 1 hour
-              initTime: 3 * 60 * 1000, // 3 minutes
-              increment: 1 * 1000, // 1 second
-            },
-          ];
+      this.tournaments = stored ? JSON.parse(stored) : [];
     } catch (error) {
       console.error('Error loading tournaments from AsyncStorage:', error);
     }

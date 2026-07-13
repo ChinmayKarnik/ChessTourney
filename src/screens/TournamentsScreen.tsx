@@ -51,9 +51,10 @@ export const TournamentsScreen = ({ navigation }: Props) => {
               key={tournament.id}
               style={styles.tournamentCard}
               onPress={() =>
-                navigation.navigate('OngoingTournament', {
-                  tournamentId: tournament.id,
-                })
+                navigation.navigate(
+                  endTime <= Date.now() ? 'FinishedTournament' : 'OngoingTournament',
+                  { tournamentId: tournament.id },
+                )
               }
             >
               <Text style={styles.tournamentText}>

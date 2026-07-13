@@ -1,6 +1,9 @@
 class LichessController {
   private static instance: LichessController;
 
+  // global backoff: once we hit a 429, no requests go out until this timestamp.
+  private rateLimitedUntil = 0;
+
   static getInstance(): LichessController {
     if (!LichessController.instance) {
       LichessController.instance = new LichessController();
@@ -8,11 +11,38 @@ class LichessController {
     return LichessController.instance;
   }
 
-  async checkUsernameExists(username: string): Promise<boolean> {
-    const response = await fetch(
-      `https://lichess.org/api/user/${encodeURIComponent(username)}`,
+  private async waitForRateLimit() {
+    while (Date.now() < this.rateLimitedUntil) {
+      const remaining = this.rateLimitedUntil - Date.now();
+      console.log('lichess API rate limited, waiting', remaining, 'ms');
+      await new Promise<void>(resolve => setTimeout(resolve, remaining));
+    }
+  }
+
+  private registerRateLimit() {
+    this.rateLimitedUntil = Date.now() + 60000;
+    console.log(
+      'lichess API rate limited, backing off until',
+      new Date(this.rateLimitedUntil).toISOString(),
     );
-    return response.ok;
+  }
+
+  async checkUsernameExists(username: string): Promise<boolean> {
+    await this.waitForRateLimit();
+
+    try {
+      const url = `https://lichess.org/api/user/${encodeURIComponent(username)}`;
+      console.log('LICHESS_API_CALL', url);
+      const response = await fetch(url);
+      if (response.status === 429) {
+        this.registerRateLimit();
+        return false;
+      }
+      return response.ok;
+    } catch (error) {
+      console.log('checkUsernameExists failed for', username, error);
+      return false;
+    }
   }
 
   async getGamesInTimeRange(
@@ -20,12 +50,26 @@ class LichessController {
     startTime: number,
     endTime: number,
   ): Promise<any[]> {
-    const response = await fetch(
-      `https://lichess.org/api/games/user/${encodeURIComponent(
+    await this.waitForRateLimit();
+
+    let response;
+    try {
+      const url = `https://lichess.org/api/games/user/${encodeURIComponent(
         username,
-      )}?since=${startTime}&until=${endTime}&moves=false`,
-      { headers: { Accept: 'application/x-ndjson' } },
-    );
+      )}?since=${startTime}&until=${endTime}&moves=false`;
+      console.log('LICHESS_API_CALL', url);
+      response = await fetch(url, {
+        headers: { Accept: 'application/x-ndjson' },
+      });
+    } catch (error) {
+      console.log('getGamesInTimeRange failed for', username, error);
+      return [];
+    }
+
+    if (response.status === 429) {
+      this.registerRateLimit();
+      return [];
+    }
 
     if (!response.ok) {
       return [];

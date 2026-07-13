@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { DatabaseController } from '../data/controllers';
@@ -28,7 +28,7 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
           .getTournaments()
           .find(t => t.id === route.params.tournamentId),
       );
-    }, 5000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [route.params.tournamentId]);
 
@@ -61,9 +61,18 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
     .sort((a: any, b: any) => b.points - a.points);
 
   const ongoingMatches = tournament.ongoingMatches ?? {};
-  const ongoingMatchesList = tournament.players.flatMap((player: string) =>
-    (ongoingMatches[player] ?? []).map((m: any) => ({ player, ...m })),
-  );
+  const seenMatchIds = new Set<string>();
+  const ongoingMatchesList = tournament.players
+    .flatMap((player: string) =>
+      (ongoingMatches[player] ?? []).map((m: any) => ({ player, ...m })),
+    )
+    .filter((m: any) => {
+      if (seenMatchIds.has(m.id)) {
+        return false;
+      }
+      seenMatchIds.add(m.id);
+      return true;
+    });
 
   const elapsedMs = Math.max(0, now - tournament.startTime);
   const elapsedSeconds = Math.floor(elapsedMs / 1000);
@@ -88,14 +97,23 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
         <View style={styles.leaderboard}>
           {leaderboard.map(
             (entry: { player: string; points: number; rating?: number }, i: number) => (
-              <View key={entry.player} style={styles.row}>
+              <TouchableOpacity
+                key={entry.player}
+                style={styles.row}
+                onPress={() =>
+                  navigation.navigate('PlayerMatches', {
+                    player: entry.player,
+                    matches: matches[entry.player] ?? [],
+                  })
+                }
+              >
                 <Text style={styles.rank}>{i + 1}.</Text>
                 <Text style={styles.player}>
                   {entry.player}
                   {entry.rating ? ` (${entry.rating})` : ''}
                 </Text>
                 <Text style={styles.points}>{entry.points}</Text>
-              </View>
+              </TouchableOpacity>
             ),
           )}
         </View>
@@ -105,11 +123,18 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
           <Text style={styles.emptyText}>No matches in progress</Text>
         ) : (
           ongoingMatchesList.map((m: any) => (
-            <View key={`${m.player}-${m.id}`} style={styles.matchRow}>
+            <TouchableOpacity
+              key={`${m.player}-${m.id}`}
+              style={styles.matchRow}
+              onPress={() => Linking.openURL(`https://lichess.org/${m.id}`)}
+            >
               <Text style={styles.matchText}>
                 {m.player} vs {m.opponent} ({m.speed})
               </Text>
-            </View>
+              <Text style={styles.matchTime}>
+                Started at {new Date(m.playedAt).toLocaleTimeString()}
+              </Text>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
@@ -193,5 +218,10 @@ const styles = StyleSheet.create({
   },
   matchText: {
     fontSize: 16,
+  },
+  matchTime: {
+    fontSize: 13,
+    color: '#666666',
+    marginTop: 2,
   },
 });

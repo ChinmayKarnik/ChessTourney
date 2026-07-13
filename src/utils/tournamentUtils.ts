@@ -67,6 +67,7 @@ const setLatestDataForTournament = async (id: string) => {
   console.log(new Date(Date.now()).toISOString(), 'updating tournament', {
     matches,
     points,
+    ongoingMatches
   });
 
   await DatabaseController.getInstance().updateTournament(id, {

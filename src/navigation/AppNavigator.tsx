@@ -8,6 +8,7 @@ import {
   FinishedTournamentScreen,
   TournamentsScreen,
   CreateTournamentScreen,
+  PlayerMatchesScreen,
 } from '../screens';
 
 export type RootStackParamList = {
@@ -17,6 +18,7 @@ export type RootStackParamList = {
   CreateTournament: undefined;
   OngoingTournament: { tournamentId: string };
   FinishedTournament: { tournamentId: string };
+  PlayerMatches: { player: string; matches: any[] };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -39,6 +41,10 @@ export const AppNavigator = () => {
         <RootStack.Screen
           name="FinishedTournament"
           component={FinishedTournamentScreen}
+        />
+        <RootStack.Screen
+          name="PlayerMatches"
+          component={PlayerMatchesScreen}
         />
       </RootStack.Navigator>
     </NavigationContainer>
