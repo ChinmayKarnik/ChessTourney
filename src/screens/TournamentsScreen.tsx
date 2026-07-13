@@ -45,20 +45,15 @@ export const TournamentsScreen = ({ navigation }: Props) => {
       <ScrollView style={styles.section}>
         {tournaments.map(tournament => {
           const endTime = tournament.startTime + tournament.duration;
-          const isOngoing = Date.now() < endTime;
 
           return (
             <TouchableOpacity
               key={tournament.id}
               style={styles.tournamentCard}
               onPress={() =>
-                isOngoing
-                  ? navigation.navigate('OngoingTournament', {
-                      tournamentId: tournament.id,
-                    })
-                  : navigation.navigate('FinishedTournament', {
-                      tournamentId: tournament.id,
-                    })
+                navigation.navigate('OngoingTournament', {
+                  tournamentId: tournament.id,
+                })
               }
             >
               <Text style={styles.tournamentText}>

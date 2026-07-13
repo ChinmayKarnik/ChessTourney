@@ -25,16 +25,14 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
   }
 
   const matches = tournament.matches ?? {};
+  const points = tournament.points ?? {};
   const leaderboard = tournament.players
     .map((player: string) => {
       const playerMatches = matches[player] ?? [];
-      const wins = playerMatches.filter(
-        (m: any) => m.result === 'win',
-      ).length;
       const rating = playerMatches[0]?.rating;
-      return { player, wins, rating };
+      return { player, points: points[player] ?? 0, rating };
     })
-    .sort((a: any, b: any) => b.wins - a.wins);
+    .sort((a: any, b: any) => b.points - a.points);
 
   return (
     <View style={styles.container}>
@@ -50,14 +48,14 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
 
       <View style={styles.leaderboard}>
         {leaderboard.map(
-          (entry: { player: string; wins: number; rating?: number }, i: number) => (
+          (entry: { player: string; points: number; rating?: number }, i: number) => (
             <View key={entry.player} style={styles.row}>
               <Text style={styles.rank}>{i + 1}.</Text>
               <Text style={styles.player}>
                 {entry.player}
                 {entry.rating ? ` (${entry.rating})` : ''}
               </Text>
-              <Text style={styles.wins}>{entry.wins}</Text>
+              <Text style={styles.wins}>{entry.points}</Text>
             </View>
           ),
         )}

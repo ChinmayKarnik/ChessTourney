@@ -27,12 +27,23 @@ class LichessController {
       { headers: { Accept: 'application/x-ndjson' } },
     );
 
+    if (!response.ok) {
+      return [];
+    }
+
     const text = await response.text();
     const games = text
       .trim()
       .split('\n')
       .filter(Boolean)
-      .map(line => JSON.parse(line));
+      .map(line => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
     return games.map(game => {
       const isWhite =
@@ -61,6 +72,7 @@ class LichessController {
         result,
         speed: game.speed,
         playedAt: game.createdAt,
+        finishedAt: game.lastMoveAt ?? game.createdAt,
         rating,
       };
     });
