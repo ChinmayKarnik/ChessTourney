@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -10,6 +10,21 @@ import {
 } from '../utils/tournamentUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
+
+const getPairingUrl = (
+  tournament: any,
+  pairing: string,
+  color: 'white' | 'black',
+): string =>
+  color === 'white'
+    ? LichessController.getInstance().buildChallengeLink(
+        pairing,
+        '',
+        tournament.initTime,
+        tournament.increment,
+        'white',
+      )
+    : 'https://lichess.org/';
 
 export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
   const [tournament, setTournament] = useState<any>(() =>
@@ -24,6 +39,7 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
   const [nextPairingColor, setNextPairingColor] = useState<
     'white' | 'black' | null
   >(null);
+  const redirectedPairingRef = useRef<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -48,6 +64,18 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
       pairing ? getMatchColor(tournament, username, pairing) : null,
     );
   }, [tournament, username]);
+
+  useEffect(() => {
+    if (!tournament || !nextPairing || !nextPairingColor) {
+      redirectedPairingRef.current = null;
+      return;
+    }
+    if (redirectedPairingRef.current === nextPairing) {
+      return;
+    }
+    redirectedPairingRef.current = nextPairing;
+    Linking.openURL(getPairingUrl(tournament, nextPairing, nextPairingColor));
+  }, [tournament, nextPairing, nextPairingColor]);
 
   useEffect(() => {
     if (tournament && now >= tournament.startTime + tournament.duration) {
@@ -167,15 +195,7 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
           <TouchableOpacity
             style={styles.ctaButton}
             onPress={() =>
-              Linking.openURL(
-                LichessController.getInstance().buildChallengeLink(
-                  nextPairing,
-                  '',
-                  tournament.initTime,
-                  tournament.increment,
-                  'white',
-                ),
-              )
+              Linking.openURL(getPairingUrl(tournament, nextPairing, 'white'))
             }
           >
             <Text style={styles.ctaButtonText}>Challenge {nextPairing}</Text>
@@ -185,7 +205,9 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
         {isPlayerIdle && nextPairing && nextPairingColor === 'black' ? (
           <TouchableOpacity
             style={styles.ctaButton}
-            onPress={() => Linking.openURL('https://lichess.org/')}
+            onPress={() =>
+              Linking.openURL(getPairingUrl(tournament, nextPairing, 'black'))
+            }
           >
             <Text style={styles.ctaButtonText}>
               Waiting for {nextPairing} to challenge you — open Lichess

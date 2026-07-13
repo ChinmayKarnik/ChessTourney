@@ -17,10 +17,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateTournament'>;
 const now = new Date(Date.now());
 
 export const CreateTournamentScreen = ({ navigation }: Props) => {
-  const [name, setName] = useState('');
-  const [initTimeMinutes, setInitTimeMinutes] = useState('');
-  const [incrementSeconds, setIncrementSeconds] = useState('');
-  const [players, setPlayers] = useState<string[]>([]);
+  const [name, setName] = useState('BlindFork Arena');
+  const [initTimeMinutes, setInitTimeMinutes] = useState('3');
+  const [incrementSeconds, setIncrementSeconds] = useState('1');
+  const [players, setPlayers] = useState<string[]>([
+    'BlindFork',
+    'HarshB20000',
+    'kkr19',
+    'rajjayavant',
+  ]);
   const [newPlayer, setNewPlayer] = useState('');
   const [year, setYear] = useState(String(now.getFullYear()));
   const [month, setMonth] = useState(String(now.getMonth() + 1));
@@ -85,12 +90,15 @@ export const CreateTournamentScreen = ({ navigation }: Props) => {
     setError('');
 
     await DatabaseController.getInstance().addTournament({
-      name: trimmedName,
+      name: trimmedName ,
       players,
       startTime,
       duration: 60 * 60 * 1000,
       initTime: initTime * 60 * 1000,
       increment: increment * 1000,
+      oddsInfo : {
+        ["0-1"] :"Rk-Rq-"
+      }
     });
 
     navigation.navigate('Tournaments');
