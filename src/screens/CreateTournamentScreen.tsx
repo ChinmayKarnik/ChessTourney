@@ -96,9 +96,21 @@ export const CreateTournamentScreen = ({ navigation }: Props) => {
       duration: 60 * 60 * 1000,
       initTime: initTime * 60 * 1000,
       increment: increment * 1000,
-      oddsInfo : {
-        ["0-1"] :"Rk-Rq-"
-      }
+      // Piece-odds handicap per matchup, keyed by sorted player-index pair
+      // "i-j" (indices into `players`: 0=BlindFork, 1=HarshB20000, 2=kkr19,
+      // 3=rajjayavant). Each entry names the giver's index and which of their
+      // own pieces they remove before the game, coded by standard starting
+      // square — Ra/Rh = queenside/kingside rook, Nb/Ng = queenside/kingside
+      // knight, Bc/Bf = queenside/kingside bishop, Q = queen, Pa-Ph = pawn on
+      // that file. `null` means an even game.
+      oddsInfo: {
+        '0-1': { giver: 0, missing: ['Rh','Nb','Pa'] },
+        '0-2': { giver: 0, missing: ['Ra', 'Ng'] },
+        '0-3': { giver: 0, missing: ['Nb'] },
+        '1-2': null,
+        '1-3': { giver: 3, missing: ['Nb'] },
+        '2-3': { giver: 3, missing: ['Bc'] },
+      },
     });
 
     navigation.navigate('Tournaments');
@@ -182,7 +194,7 @@ export const CreateTournamentScreen = ({ navigation }: Props) => {
         </View>
 
         <Text style={styles.label}>Players</Text>
-        {players.map(player => (
+        {[...players].sort((a, b) => a.localeCompare(b)).map(player => (
           <Text key={player} style={styles.player}>
             {player}
           </Text>

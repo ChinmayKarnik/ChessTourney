@@ -41,7 +41,7 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
       const rating = playerMatches[0]?.rating;
       return { player, points: points[player] ?? 0, rating };
     })
-    .sort((a: any, b: any) => b.points - a.points);
+    .sort((a: any, b: any) => a.player.localeCompare(b.player));
 
   return (
     <View style={styles.container}>

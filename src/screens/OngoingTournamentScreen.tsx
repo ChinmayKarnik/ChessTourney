@@ -5,6 +5,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { DatabaseController, LichessController } from '../data/controllers';
 import {
   getMatchColor,
+  getMatchFen,
   getNextPairing,
   setLatestDataForTournament,
 } from '../utils/tournamentUtils';
@@ -13,13 +14,14 @@ type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
 
 const getPairingUrl = (
   tournament: any,
+  player: string,
   pairing: string,
   color: 'white' | 'black',
 ): string =>
   color === 'white'
     ? LichessController.getInstance().buildChallengeLink(
         pairing,
-        '',
+        getMatchFen(tournament, player, pairing, color),
         tournament.initTime,
         tournament.increment,
         'white',
@@ -74,8 +76,10 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
       return;
     }
     redirectedPairingRef.current = nextPairing;
-    Linking.openURL(getPairingUrl(tournament, nextPairing, nextPairingColor));
-  }, [tournament, nextPairing, nextPairingColor]);
+    Linking.openURL(
+      getPairingUrl(tournament, username, nextPairing, nextPairingColor),
+    );
+  }, [tournament, username, nextPairing, nextPairingColor]);
 
   useEffect(() => {
     if (tournament && now >= tournament.startTime + tournament.duration) {
@@ -123,7 +127,7 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
       const rating = playerMatches[0]?.rating;
       return { player, points: points[player] ?? 0, rating };
     })
-    .sort((a: any, b: any) => b.points - a.points);
+    .sort((a: any, b: any) => a.player.localeCompare(b.player));
 
   const ongoingMatches = tournament.ongoingMatches ?? {};
   const seenMatchIds = new Set<string>();
@@ -195,7 +199,9 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
           <TouchableOpacity
             style={styles.ctaButton}
             onPress={() =>
-              Linking.openURL(getPairingUrl(tournament, nextPairing, 'white'))
+              Linking.openURL(
+                getPairingUrl(tournament, username, nextPairing, 'white'),
+              )
             }
           >
             <Text style={styles.ctaButtonText}>Challenge {nextPairing}</Text>
@@ -206,7 +212,9 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
           <TouchableOpacity
             style={styles.ctaButton}
             onPress={() =>
-              Linking.openURL(getPairingUrl(tournament, nextPairing, 'black'))
+              Linking.openURL(
+                getPairingUrl(tournament, username, nextPairing, 'black'),
+              )
             }
           >
             <Text style={styles.ctaButtonText}>
