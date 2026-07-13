@@ -69,6 +69,13 @@ export const ProfileScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>{'< Back'}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Profile</Text>
 
       {isEditing ? (
@@ -100,13 +107,6 @@ export const ProfileScreen = ({ navigation }: Props) => {
           </TouchableOpacity>
         </>
       )}
-
-      <TouchableOpacity
-        style={[styles.button, styles.backButton]}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -118,6 +118,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff',
     paddingHorizontal: 24,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
   },
   title: {
     fontSize: 24,
@@ -148,10 +157,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
-  },
-  backButton: {
-    marginTop: 20,
-    backgroundColor: '#8e8e93',
   },
   buttonText: {
     color: '#ffffff',

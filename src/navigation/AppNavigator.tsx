@@ -6,11 +6,15 @@ import {
   ProfileScreen,
   OngoingTournamentScreen,
   FinishedTournamentScreen,
+  TournamentsScreen,
+  CreateTournamentScreen,
 } from '../screens';
 
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
+  Tournaments: undefined;
+  CreateTournament: undefined;
   OngoingTournament: { tournamentId: string };
   FinishedTournament: { tournamentId: string };
 };
@@ -23,6 +27,11 @@ export const AppNavigator = () => {
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Home" component={HomeScreen} />
         <RootStack.Screen name="Profile" component={ProfileScreen} />
+        <RootStack.Screen name="Tournaments" component={TournamentsScreen} />
+        <RootStack.Screen
+          name="CreateTournament"
+          component={CreateTournamentScreen}
+        />
         <RootStack.Screen
           name="OngoingTournament"
           component={OngoingTournamentScreen}

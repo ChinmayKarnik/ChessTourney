@@ -1,16 +1,7 @@
-import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { DatabaseController } from '../data/controllers';
-import { setLatestDataForTournament } from '../utils/tournamentUtils';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -22,21 +13,6 @@ type Props = {
 };
 
 export const HomeScreen = ({ navigation }: Props) => {
-  const [tournaments, setTournaments] = useState<any[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      DatabaseController.getInstance()
-        .loadTournaments()
-        .then(loaded => {
-          setTournaments(loaded);
-          if (loaded[0]) {
-            setLatestDataForTournament(loaded[0].id);
-          }
-        });
-    }, []),
-  );
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ChessTourney</Text>
@@ -47,39 +23,19 @@ export const HomeScreen = ({ navigation }: Props) => {
         <Text style={styles.buttonText}>Go to Profile</Text>
       </TouchableOpacity>
 
-      <ScrollView style={styles.section}>
-        <Text style={styles.sectionTitle}>Tournaments</Text>
-        {tournaments.map(tournament => {
-          const endTime = tournament.startTime + tournament.duration;
-          const isOngoing = Date.now() < endTime;
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Tournaments')}
+      >
+        <Text style={styles.buttonText}>Tournaments</Text>
+      </TouchableOpacity>
 
-          return (
-            <TouchableOpacity
-              key={tournament.id}
-              style={styles.tournamentCard}
-              onPress={() =>
-                isOngoing
-                  ? navigation.navigate('OngoingTournament', {
-                      tournamentId: tournament.id,
-                    })
-                  : navigation.navigate('FinishedTournament', {
-                      tournamentId: tournament.id,
-                    })
-              }
-            >
-              <Text style={styles.tournamentText}>
-                Start: {new Date(tournament.startTime).toLocaleString()}
-              </Text>
-              <Text style={styles.tournamentText}>
-                End: {new Date(endTime).toLocaleString()}
-              </Text>
-              <Text style={styles.tournamentText}>
-                Players: {tournament.players.join(', ')}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('CreateTournament')}
+      >
+        <Text style={styles.buttonText}>Create Tournament</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -101,32 +57,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
+    marginBottom: 12,
   },
   buttonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  section: {
-    marginTop: 24,
-    width: '100%',
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  tournamentCard: {
-    backgroundColor: '#f2f2f7',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-  },
-  tournamentText: {
-    fontSize: 14,
-    color: '#333333',
-    marginBottom: 2,
   },
 });

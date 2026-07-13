@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'CreateTournament'>;
 
-export const OngoingTournamentScreen = ({ navigation }: Props) => {
+export const CreateTournamentScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -15,7 +15,7 @@ export const OngoingTournamentScreen = ({ navigation }: Props) => {
         <Text style={styles.backButtonText}>{'< Back'}</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Ongoing Tournament</Text>
+      <Text style={styles.title}>Create Tournament</Text>
     </View>
   );
 };

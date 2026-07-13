@@ -65,6 +65,27 @@ class LichessController {
       };
     });
   }
+
+  buildChallengeLink(
+    opponent: string,
+    fen: string,
+    initTime: number,
+    increment: number,
+    color: 'white' | 'black' | 'random' = 'random',
+  ): string {
+    const minutesPerSide = initTime / (60 * 1000);
+    const incrementSeconds = increment / 1000;
+
+    return (
+      `https://lichess.org/?user=${encodeURIComponent(opponent)}` +
+      `&fen=${encodeURIComponent(fen)}` +
+      `&minutesPerSide=${minutesPerSide}` +
+      `&increment=${incrementSeconds}` +
+      `&gameMode=casual` +
+      `&color=${color}` +
+      `#friend`
+    );
+  }
 }
 
 export default LichessController;
