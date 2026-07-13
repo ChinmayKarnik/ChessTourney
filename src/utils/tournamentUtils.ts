@@ -77,4 +77,57 @@ const setLatestDataForTournament = async (id: string) => {
   });
 };
 
-export { setLatestDataForTournament };
+const getNextPairing = (tournament: any, player: string): string | null => {
+  const ongoingMatches = tournament.ongoingMatches ?? {};
+  const matches = tournament.matches ?? {};
+
+  const isIdle = (p: string) => (ongoingMatches[p] ?? []).length === 0;
+
+  const idleOpponents = tournament.players.filter(
+    (p: string) => p !== player && isIdle(p),
+  );
+
+  if (idleOpponents.length === 0) {
+    return null;
+  }
+
+  const playerMatches = matches[player] ?? [];
+  const lastMatch = [...playerMatches].sort(
+    (a: any, b: any) => b.playedAt - a.playedAt,
+  )[0];
+  const lastOpponent = lastMatch?.opponent;
+
+  const candidates = idleOpponents.filter((p: string) => p !== lastOpponent);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return tournament.players.find((p: string) => candidates.includes(p)) ?? null;
+};
+
+// Determines which color `player` should play as against `opponent` for their
+// next match: if they've played each other before, reverse the color from
+// their most recent match against each other; otherwise the alphabetically
+// earlier username gets white. Deterministic, so every device agrees.
+const getMatchColor = (
+  tournament: any,
+  player: string,
+  opponent: string,
+): 'white' | 'black' => {
+  const matches = tournament.matches ?? {};
+  const priorMatches = (matches[player] ?? []).filter(
+    (m: any) => m.opponent === opponent,
+  );
+  const lastMatch = [...priorMatches].sort(
+    (a: any, b: any) => b.playedAt - a.playedAt,
+  )[0];
+
+  if (lastMatch) {
+    return lastMatch.color === 'white' ? 'black' : 'white';
+  }
+
+  return player < opponent ? 'white' : 'black';
+};
+
+export { setLatestDataForTournament, getNextPairing, getMatchColor };

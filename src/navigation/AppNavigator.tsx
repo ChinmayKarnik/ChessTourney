@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   HomeScreen,
   ProfileScreen,
+  UpcomingTournamentScreen,
   OngoingTournamentScreen,
   FinishedTournamentScreen,
   TournamentsScreen,
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Tournaments: undefined;
   CreateTournament: undefined;
+  UpcomingTournament: { tournamentId: string };
   OngoingTournament: { tournamentId: string };
   FinishedTournament: { tournamentId: string };
   PlayerMatches: { player: string; matches: any[] };
@@ -33,6 +35,10 @@ export const AppNavigator = () => {
         <RootStack.Screen
           name="CreateTournament"
           component={CreateTournamentScreen}
+        />
+        <RootStack.Screen
+          name="UpcomingTournament"
+          component={UpcomingTournamentScreen}
         />
         <RootStack.Screen
           name="OngoingTournament"

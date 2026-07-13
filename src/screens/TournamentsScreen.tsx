@@ -45,18 +45,23 @@ export const TournamentsScreen = ({ navigation }: Props) => {
       <ScrollView style={styles.section}>
         {tournaments.map(tournament => {
           const endTime = tournament.startTime + tournament.duration;
+          const now = Date.now();
+          const screen =
+            tournament.startTime > now
+              ? 'UpcomingTournament'
+              : endTime <= now
+              ? 'FinishedTournament'
+              : 'OngoingTournament';
 
           return (
             <TouchableOpacity
               key={tournament.id}
               style={styles.tournamentCard}
               onPress={() =>
-                navigation.navigate(
-                  endTime <= Date.now() ? 'FinishedTournament' : 'OngoingTournament',
-                  { tournamentId: tournament.id },
-                )
+                navigation.navigate(screen, { tournamentId: tournament.id })
               }
             >
+              <Text style={styles.tournamentName}>{tournament.name}</Text>
               <Text style={styles.tournamentText}>
                 Start: {new Date(tournament.startTime).toLocaleString()}
               </Text>
@@ -105,6 +110,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
+  },
+  tournamentName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 4,
   },
   tournamentText: {
     fontSize: 14,

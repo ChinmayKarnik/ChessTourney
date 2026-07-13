@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { DatabaseController } from '../data/controllers';
-import { setLatestDataForTournament } from '../utils/tournamentUtils';
+import { DatabaseController, LichessController } from '../data/controllers';
+import {
+  getMatchColor,
+  getNextPairing,
+  setLatestDataForTournament,
+} from '../utils/tournamentUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
 
@@ -14,11 +18,44 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
       .find(t => t.id === route.params.tournamentId),
   );
   const [now, setNow] = useState(Date.now());
+  const [username, setUsername] = useState('');
+  const [isPlayerIdle, setIsPlayerIdle] = useState(false);
+  const [nextPairing, setNextPairing] = useState<string | null>(null);
+  const [nextPairingColor, setNextPairingColor] = useState<
+    'white' | 'black' | null
+  >(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    DatabaseController.getInstance().loadUsername().then(setUsername);
+  }, []);
+
+  useEffect(() => {
+    if (!tournament || !username) {
+      return;
+    }
+    const ongoingMatches = tournament.ongoingMatches ?? {};
+    const idle = (ongoingMatches[username] ?? []).length === 0;
+    setIsPlayerIdle(idle);
+
+    const pairing = idle ? getNextPairing(tournament, username) : null;
+    setNextPairing(pairing);
+    setNextPairingColor(
+      pairing ? getMatchColor(tournament, username, pairing) : null,
+    );
+  }, [tournament, username]);
+
+  useEffect(() => {
+    if (tournament && now >= tournament.startTime + tournament.duration) {
+      navigation.replace('FinishedTournament', {
+        tournamentId: route.params.tournamentId,
+      });
+    }
+  }, [now, tournament, navigation, route.params.tournamentId]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -86,7 +123,8 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
   return (
     <View style={styles.container}>
       {backButton}
-      <Text style={styles.title}>Ongoing Tournament</Text>
+      <Text style={styles.title}>{tournament.name}</Text>
+      <Text style={styles.subtitle}>Ongoing Tournament</Text>
 
       <Text style={styles.timerLabel}>
         Started at {new Date(tournament.startTime).toLocaleTimeString()}
@@ -117,6 +155,43 @@ export const OngoingTournamentScreen = ({ route, navigation }: Props) => {
             ),
           )}
         </View>
+
+        {isPlayerIdle ? (
+          <Text style={styles.idleText}>
+            You are idle
+            {nextPairing ? ` — next pairing: ${nextPairing}` : ''}
+          </Text>
+        ) : null}
+
+        {isPlayerIdle && nextPairing && nextPairingColor === 'white' ? (
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() =>
+              Linking.openURL(
+                LichessController.getInstance().buildChallengeLink(
+                  nextPairing,
+                  '',
+                  tournament.initTime,
+                  tournament.increment,
+                  'white',
+                ),
+              )
+            }
+          >
+            <Text style={styles.ctaButtonText}>Challenge {nextPairing}</Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {isPlayerIdle && nextPairing && nextPairingColor === 'black' ? (
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() => Linking.openURL('https://lichess.org/')}
+          >
+            <Text style={styles.ctaButtonText}>
+              Waiting for {nextPairing} to challenge you — open Lichess
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <Text style={styles.sectionTitle}>Ongoing Matches</Text>
         {ongoingMatchesList.length === 0 ? (
@@ -163,6 +238,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 32,
   },
+  subtitle: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 4,
+  },
   timerLabel: {
     fontSize: 14,
     color: '#666666',
@@ -198,6 +278,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   points: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  idleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#d9822b',
+    marginTop: 24,
+  },
+  ctaButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  ctaButtonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },

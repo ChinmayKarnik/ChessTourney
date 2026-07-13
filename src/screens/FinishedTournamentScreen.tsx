@@ -49,7 +49,8 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
         <Text style={styles.back}>{'< Back'}</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Tournament Finished</Text>
+      <Text style={styles.title}>{tournament.name}</Text>
+      <Text style={styles.status}>Tournament Finished</Text>
       <Text style={styles.subtitle}>
         {tournament.initTime / 1000 / 60}+{tournament.increment / 1000} •{' '}
         {tournament.duration / (60 * 60 * 1000)}H
@@ -97,6 +98,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '600',
+  },
+  status: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 4,
   },
   subtitle: {
     fontSize: 14,

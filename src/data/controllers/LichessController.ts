@@ -134,7 +134,7 @@ class LichessController {
 
     return (
       `https://lichess.org/?user=${encodeURIComponent(opponent)}` +
-      `&fen=${encodeURIComponent(fen)}` +
+      (fen ? `&fen=${encodeURIComponent(fen)}` : '') +
       `&minutesPerSide=${minutesPerSide}` +
       `&increment=${incrementSeconds}` +
       `&gameMode=casual` +
