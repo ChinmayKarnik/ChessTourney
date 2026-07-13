@@ -1,0 +1,12 @@
+
+
+
+tournaments = [
+    {
+        players : ['ChinmayKarnik','rajjayavant', 'kkr19'],
+        timeStart: timestamp here,
+        duartion :  (in ms ), 
+        timeControl : 3+2 
+    } 
+]
+    
