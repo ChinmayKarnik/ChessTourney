@@ -4,7 +4,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { DatabaseController } from '../data/controllers';
-import { setLatestDataForTournament } from '../utils/tournamentUtils';
+import {
+  importFeedTournaments,
+  setLatestDataForTournament,
+} from '../utils/tournamentUtils';
 
 type TournamentsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -22,7 +25,9 @@ export const TournamentsScreen = ({ navigation }: Props) => {
     useCallback(() => {
       DatabaseController.getInstance()
         .loadTournaments()
-        .then(loaded => {
+        .then(() => importFeedTournaments())
+        .then(() => {
+          const loaded = DatabaseController.getInstance().getTournaments();
           setTournaments(loaded);
           if (loaded[0]) {
             setLatestDataForTournament(loaded[0].id);

@@ -1,5 +1,61 @@
 import { DatabaseController, LichessController } from '../data/controllers';
 
+// Public feed of tournaments to auto-import — anyone with this URL can push a
+// tournament into every friend's app, so keep this strictly read/import-only.
+const TOURNAMENT_FEED_URL =
+  'https://gist.githubusercontent.com/ChinmayKarnik/3d2c100cef1086fb1b48f51614a6deff/raw/tournaments-feed.json';
+
+const feedTournamentChanged = (existing: any, feed: any): boolean =>
+  Object.keys(feed).some(
+    key => JSON.stringify(existing[key]) !== JSON.stringify(feed[key]),
+  );
+
+const importFeedTournaments = async (): Promise<void> => {
+  let feed: any[];
+  try {
+    // Cache-busting query param: the gist CDN sends `cache-control:
+    // max-age=300`, and RN's fetch will otherwise happily serve a stale
+    // response for up to 5 minutes after the first request.
+    const url = `${TOURNAMENT_FEED_URL}?t=${Date.now()}`;
+    console.log('TOURNAMENT_FEED fetching', url);
+    const response = await fetch(url);
+    feed = await response.json();
+    console.log('TOURNAMENT_FEED fetched', JSON.stringify(feed));
+  } catch (error) {
+    console.log('failed to fetch tournament feed', error);
+    return;
+  }
+
+  const existingById = new Map(
+    DatabaseController.getInstance()
+      .getTournaments()
+      .map(t => [t.id, t]),
+  );
+
+  for (const tournament of feed) {
+    const existing = existingById.get(tournament.id);
+    if (!existing) {
+      console.log('TOURNAMENT_FEED adding new tournament', tournament.id);
+      await DatabaseController.getInstance().addTournament(tournament);
+    } else if (feedTournamentChanged(existing, tournament)) {
+      console.log(
+        'TOURNAMENT_FEED updating tournament',
+        tournament.id,
+        'existing:',
+        JSON.stringify(existing),
+        'feed:',
+        JSON.stringify(tournament),
+      );
+      await DatabaseController.getInstance().updateTournament(
+        tournament.id,
+        tournament,
+      );
+    } else {
+      console.log('TOURNAMENT_FEED no changes for', tournament.id);
+    }
+  }
+};
+
 const setLatestDataForTournament = async (id: string) => {
   // get trouanment from the database.
   const tournament = DatabaseController.getInstance()
@@ -263,6 +319,7 @@ const getMatchFen = (
 
 export {
   setLatestDataForTournament,
+  importFeedTournaments,
   getNextPairing,
   getMatchColor,
   buildOddsFen,

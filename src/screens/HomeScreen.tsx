@@ -29,13 +29,6 @@ export const HomeScreen = ({ navigation }: Props) => {
       >
         <Text style={styles.buttonText}>Tournaments</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('CreateTournament')}
-      >
-        <Text style={styles.buttonText}>Create Tournament</Text>
-      </TouchableOpacity>
     </View>
   );
 };
