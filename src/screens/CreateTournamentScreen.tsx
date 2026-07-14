@@ -96,6 +96,9 @@ export const CreateTournamentScreen = ({ navigation }: Props) => {
       duration: 60 * 60 * 1000,
       initTime: initTime * 60 * 1000,
       increment: increment * 1000,
+      // From a player's 3rd consecutive win onward, those wins score 4 points
+      // instead of 2.
+      streakEnabled: true,
       // Piece-odds handicap per matchup, keyed by sorted player-index pair
       // "i-j" (indices into `players`: 0=BlindFork, 1=HarshB20000, 2=kkr19,
       // 3=rajjayavant). Each entry names the giver's index and which of their

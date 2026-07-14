@@ -34,14 +34,7 @@ export const FinishedTournamentScreen = ({ route, navigation }: Props) => {
   }
 
   const matches = tournament.matches ?? {};
-  const points = tournament.points ?? {};
-  const leaderboard = tournament.players
-    .map((player: string) => {
-      const playerMatches = matches[player] ?? [];
-      const rating = playerMatches[0]?.rating;
-      return { player, points: points[player] ?? 0, rating };
-    })
-    .sort((a: any, b: any) => a.player.localeCompare(b.player));
+  const leaderboard = tournament.leaderboard ?? [];
 
   return (
     <View style={styles.container}>

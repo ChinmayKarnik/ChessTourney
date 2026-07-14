@@ -98,16 +98,26 @@ const setLatestDataForTournament = async (id: string) => {
   }
 
   // points: win = 2, draw = 1, loss = 0. Only count matches that have finished.
+  // If streakEnabled, wins from the 3rd consecutive win onward score 4 instead
+  // of 2 — streak is tracked in play order and resets on a draw or loss.
   const points: Record<string, number> = {};
 
   for (const player of tournament.players) {
-    points[player] = matches[player]
+    const finishedMatches = matches[player]
       .filter((m: any) => m.finishedAt <= Date.now())
-      .reduce((total: number, m: any) => {
-        if (m.result === 'win') return total + 2;
-        if (m.result === 'draw') return total + 1;
-        return total;
-      }, 0);
+      .sort((a: any, b: any) => a.playedAt - b.playedAt);
+
+    let winStreak = 0;
+    points[player] = finishedMatches.reduce((total: number, m: any) => {
+      if (m.result === 'win') {
+        winStreak += 1;
+        const onStreak = tournament.streakEnabled && winStreak >= 3;
+        return total + (onStreak ? 4 : 2);
+      }
+      winStreak = 0;
+      if (m.result === 'draw') return total + 1;
+      return total;
+    }, 0);
   }
 
   // ongoing matches: started before now, and either have no finish time or finish after now.
@@ -120,16 +130,28 @@ const setLatestDataForTournament = async (id: string) => {
     );
   }
 
+  // leaderboard: one row per player, ranked by points (ties broken alphabetically).
+  const leaderboard = tournament.players
+    .map((player: string) => {
+      const rating = matches[player][0]?.rating;
+      return { player, points: points[player] ?? 0, rating };
+    })
+    .sort(
+      (a: any, b: any) => b.points - a.points || a.player.localeCompare(b.player),
+    );
+
   console.log(new Date(Date.now()).toISOString(), 'updating tournament', {
     matches,
     points,
-    ongoingMatches
+    ongoingMatches,
+    leaderboard,
   });
 
   await DatabaseController.getInstance().updateTournament(id, {
     matches,
     points,
     ongoingMatches,
+    leaderboard,
   });
 };
 
