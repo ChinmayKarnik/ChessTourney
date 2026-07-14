@@ -30,6 +30,38 @@ const STATUS = {
 const formatTimeControl = (initTime: number, increment: number): string =>
   `${initTime / 60000}+${increment / 1000}`;
 
+// Dev-only: injects extra tournaments (one of each status) into the list so
+// the screen can be styled without needing real upcoming/finished data.
+// Never persisted — flip off before shipping.
+const DEBUG_SHOW_FAKE_TOURNAMENTS = true;
+
+const DEBUG_TOURNAMENTS = [
+  {
+    id: 'debug-upcoming-1',
+    name: 'Winter Blitz Cup',
+    players: ['BlindFork', 'HarshB20000', 'kkr19', 'rajjayavant'],
+    startTime: Date.now() + 2 * 24 * 60 * 60 * 1000,
+    duration: 60 * 60 * 1000,
+    initTime: 180000,
+    increment: 1000,
+  },
+  {
+    id: 'debug-finished-1',
+    name: 'Rapid Showdown',
+    players: ['BlindFork', 'HarshB20000', 'kkr19', 'rajjayavant'],
+    startTime: Date.now() - 3 * 24 * 60 * 60 * 1000,
+    duration: 60 * 60 * 1000,
+    initTime: 600000,
+    increment: 5000,
+    leaderboard: [
+      { player: 'kkr19', points: 14 },
+      { player: 'rajjayavant', points: 10 },
+      { player: 'HarshB20000', points: 6 },
+      { player: 'BlindFork', points: 4 },
+    ],
+  },
+];
+
 export const TournamentsScreen = ({ navigation }: Props) => {
   const [tournaments, setTournaments] = useState<any[]>([]);
   const { top } = useSafeAreaInsets();
@@ -41,7 +73,11 @@ export const TournamentsScreen = ({ navigation }: Props) => {
         .then(() => importFeedTournaments())
         .then(() => {
           const loaded = DatabaseController.getInstance().getTournaments();
-          setTournaments(loaded);
+          setTournaments(
+            DEBUG_SHOW_FAKE_TOURNAMENTS
+              ? [...loaded, ...DEBUG_TOURNAMENTS]
+              : loaded,
+          );
           if (loaded[0]) {
             setLatestDataForTournament(loaded[0].id);
           }
