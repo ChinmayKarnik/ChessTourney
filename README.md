@@ -50,21 +50,35 @@ A casual friend group rarely has evenly matched ratings, so a plain round robin 
 
 ## Technical Details
 
-Built with React Native/TypeScript, React Navigation, and AsyncStorage-backed persistence (`DatabaseController`) — no backend server. The interesting problems were all about making that work: encoding handicaps as data, turning them into a legal starting position, and getting two independent phones to agree on a match without ever talking to each other or to a server.
+Built with React Native/TypeScript, React Navigation, and AsyncStorage-backed persistence (`DatabaseController`). There's no backend for running a tournament: pairing, color, and handicaps are all computed on-device. Sharing a tournament is the one place metadata has to live somewhere external, so that flow reads from a public Gist that every device polls to auto-import it. The interesting problems were all about making the rest work: encoding handicaps as data, turning them into a legal starting position, and getting two independent phones to agree on a match without ever talking to each other or to a server.
 
 ### Modeling a handicap independently of color
 
-A handicap belongs to a *matchup*, not to a color — "BlindFork gives HarshB20000 rook-and-knight odds" is true regardless of who plays white on a given day. So each tournament stores an `oddsInfo` map keyed by the two players' sorted roster indices (`"0-1"`, `"0-2"`, ...), where each entry just names the **giver** and the pieces they remove, coded by their standard starting square (`Ra`/`Rh` for the rooks, `Nb`/`Ng` for the knights, `Q`, `Pa`-`Ph`, etc.). That coding is deliberately color-agnostic — `Nb` means "the queenside knight," full stop — because which side of the board the giver actually sits on changes every game (see below).
+A handicap belongs to a *matchup*, not to a color: "BlindFork gives HarshB20000 rook-and-knight odds" is true regardless of who plays white on a given day. Each tournament stores an `oddsInfo` map keyed by the two players' sorted roster indices, where each entry names the giver by roster index and the pieces they remove, coded by standard starting square:
+
+```ts
+oddsInfo: {
+  "0-1": { giver: 0, missing: ["Rh", "Nb", "Pa"] },
+  "0-2": { giver: 0, missing: ["Ra", "Ng"] },
+}
+```
+
+That coding is deliberately color-agnostic (`Nb` just means "the queenside knight") because which side of the board the giver actually sits on changes every game.
 
 ### Generating the FEN
 
-At match time, `buildOddsFen` builds a completely standard starting position, then deletes the giver's listed pieces from whichever back rank/pawn rank that player has actually been assigned this game. Since the giver's color flips game to game, `getMatchFen` first resolves *which* color the giver is playing this time, then hands that off to `buildOddsFen` — so the same handicap definition mirrors correctly onto either the rank-1 or rank-8 starting pieces. The result is a normal, legal FEN that Lichess accepts like any other custom-position game; the app isn't doing anything Lichess doesn't already support, just computing the right input for it.
+At match time, `buildOddsFen` builds a completely standard starting position, then deletes the giver's listed pieces from whichever back rank and pawn rank that player has actually been assigned this game. Since the giver's color flips game to game, `getMatchFen` first resolves which color the giver is playing this time, then hands that off to `buildOddsFen`, so the same handicap definition mirrors correctly onto either the rank-1 or rank-8 starting pieces. The result is a normal, legal FEN that Lichess accepts like any other custom-position game: the app isn't doing anything Lichess doesn't already support, just computing the right input for it.
 
 ### Pairing and color, without a server
 
-There's no backend coordinating who plays whom — every device independently runs the same pure functions (`getNextPairing`, `getMatchColor`) over that player's own fetched Lichess game history, so two phones with the same match history always derive the same next opponent and the same colors, with nothing to sync.
+There's no backend coordinating who plays whom: every device independently runs the same pure functions (`getNextPairing`, `getMatchColor`) over that player's own fetched Lichess game history, so two phones with the same match history always derive the same next opponent and the same colors, with nothing to sync.
 
-That determinism is also what avoids the double-challenge problem. If both players' apps reacted to a new pairing by generating and opening a Lichess challenge link, you'd get two competing challenges fired at once. Instead, the deterministically-computed color doubles as an initiator flag: whoever's assigned **white** builds the full challenge link — opponent, FEN, time control, increment — and opens it, which sends a real challenge on Lichess; whoever's assigned **black** just opens `lichess.org` and waits, since accepting an incoming challenge needs no special link at all. Two devices, zero coordination, exactly one challenge sent every time.
+That determinism is also what avoids the double-challenge problem. If both players' apps reacted to a new pairing by opening a Lichess challenge link, you'd get two competing challenges fired at once. Instead, the deterministically-computed color doubles as an initiator flag:
+
+- **White** builds the full challenge link (opponent, FEN, time control, increment) and opens it, which sends a real challenge on Lichess
+- **Black** just opens `lichess.org` and waits, since accepting an incoming challenge needs no special link at all
+
+Two devices, zero coordination, exactly one challenge sent every time.
 
 ## How it works
 
