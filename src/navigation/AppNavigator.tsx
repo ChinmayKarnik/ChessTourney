@@ -6,6 +6,7 @@ import {
   ProfileScreen,
   UpcomingTournamentScreen,
   OngoingTournamentScreen,
+  OngoingTournamentScreenDebug,
   FinishedTournamentScreen,
   TournamentsScreen,
   CreateTournamentScreen,
@@ -40,9 +41,10 @@ export const AppNavigator = () => {
           name="UpcomingTournament"
           component={UpcomingTournamentScreen}
         />
+        {/* Swapped to the debug component for screenshot purposes — revert to OngoingTournamentScreen afterward. */}
         <RootStack.Screen
           name="OngoingTournament"
-          component={OngoingTournamentScreen}
+          component={OngoingTournamentScreenDebug}
         />
         <RootStack.Screen
           name="FinishedTournament"

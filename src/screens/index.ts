@@ -2,6 +2,7 @@ export { HomeScreen } from './HomeScreen';
 export { ProfileScreen } from './ProfileScreen';
 export { UpcomingTournamentScreen } from './UpcomingTournamentScreen';
 export { OngoingTournamentScreen } from './OngoingTournamentScreen';
+export { OngoingTournamentScreenDebug } from './OngoingTournamentScreenDebug';
 export { FinishedTournamentScreen } from './FinishedTournamentScreen';
 export { TournamentsScreen } from './TournamentsScreen';
 export { CreateTournamentScreen } from './CreateTournamentScreen';
