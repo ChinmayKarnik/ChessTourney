@@ -34,11 +34,16 @@
 
 A casual friend group rarely has evenly matched ratings, so a plain round robin isn't fun for anyone. ChessTourney lets an organizer hand out piece-odds handicaps per matchup, so a 1200 and a 1800 can play a genuinely competitive game, then tracks pairings, live points, and match history automatically from each player's real Lichess games.
 
-## Highlights
+## Features
 
+**Fair Matchmaking**
 - **Piece-odds handicaps**: give any matchup its own handicap, like rook and knight odds, and the app builds the correct starting position for both colors
+
+**Live From Lichess**
 - **Lichess-verified players**: every username is checked against the Lichess API before it's accepted
 - **Live standings**: polls each player's real games and keeps scores, streak bonuses, and in-progress matches updated automatically
+
+**No Server Required**
 - **No backend needed**: next opponent, color, and handicap are all computed locally, so every device agrees without a server
 - **Shareable tournaments**: publish once and it auto-imports into everyone's app
 
