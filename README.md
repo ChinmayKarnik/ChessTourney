@@ -10,6 +10,9 @@
   Built around piece-odds handicaps, so a 1200 and a 1800 can play a genuinely competitive game.
 </p>
 
+<br/>
+<br/>
+
 <table>
   <tr>
     <td align="center" width="33%">
