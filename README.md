@@ -36,11 +36,11 @@ A casual friend group rarely has evenly matched ratings, so a plain round robin 
 
 ## Highlights
 
-- **Piece-odds handicap matchmaking** — each matchup can carry its own handicap (e.g. "rook and knight odds"), defined by which of the stronger player's pieces are removed. The app derives the correct starting FEN for both colors so it's always the *giver's* pieces that come off, no matter which side they're assigned that game.
-- **Lichess-verified players** — joining a tournament requires a real Lichess username; it's checked against the Lichess API before it's accepted.
-- **Live standings from real games** — the app polls each player's Lichess game history for the tournament's time window and computes a live leaderboard: win/draw/loss scoring, an optional bonus for 3+ win streaks, and which matches are currently in progress.
-- **Deterministic pairing, no server** — next-opponent, color assignment, and handicap all fall out of a pure function over each player's match history, so every device in the tournament agrees without any backend to coordinate them.
-- **Shareable tournaments** — a tournament can be published to a public feed and auto-imported into everyone's app, so an organizer sets it up once for the whole group.
+- **Piece-odds handicaps**: give any matchup its own handicap, like rook and knight odds, and the app builds the correct starting position for both colors
+- **Lichess-verified players**: every username is checked against the Lichess API before it's accepted
+- **Live standings**: polls each player's real games and keeps scores, streak bonuses, and in-progress matches updated automatically
+- **No backend needed**: next opponent, color, and handicap are all computed locally, so every device agrees without a server
+- **Shareable tournaments**: publish once and it auto-imports into everyone's app
 
 ## Technical Details
 
