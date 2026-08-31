@@ -5,7 +5,7 @@
 <h1 align="center">ChessTourney</h1>
 
 <p align="center">
-  <strong>Fair chess tournaments for players of any skill level.</strong><br/>
+  <strong>Fair chess tournaments for players with different skill levels.</strong><br/>
   A mobile app for running casual chess tournaments with live standings and match history.<br/>
   Built around piece-odds handicaps, so a 1200 and a 1800 can play a genuinely competitive game.
 </p>
