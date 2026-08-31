@@ -63,6 +63,9 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statusCard}>
+          <View style={styles.liveCornerBadge}>
+            <Text style={styles.liveBadgeText}>LIVE</Text>
+          </View>
           <View style={styles.statusSplitRow}>
             <View style={styles.statusTimerBlock}>
               <Text style={styles.timer}>{REMAINING}</Text>
@@ -70,14 +73,8 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
             </View>
             <View style={styles.statusDivider} />
             <View style={styles.statusMetaBlock}>
-              <View style={styles.metaTopRow}>
-                <View style={styles.liveBadge}>
-                  <Text style={styles.liveBadgeText}>LIVE</Text>
-                </View>
-                <View style={[styles.colorTag, styles.durationTag]}>
-                  <Text style={[styles.colorTagText, styles.durationTagText]}>{DURATION}</Text>
-                </View>
-              </View>
+              <Text style={styles.durationValue}>{DURATION}</Text>
+              <Text style={styles.durationLabel}>DURATION</Text>
             </View>
           </View>
         </View>
@@ -195,6 +192,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   statusCard: {
+    position: 'relative',
     borderRadius: 12,
     backgroundColor: '#252d47',
     borderWidth: 1,
@@ -216,25 +214,40 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   statusMetaBlock: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
+    marginTop: 18,
   },
-  metaTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  liveBadge: {
+  liveCornerBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
     backgroundColor: LIVE_BADGE_BG,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  durationTag: {
-    marginLeft: 6,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+  durationCaption: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9198b5',
+    letterSpacing: 0.3,
   },
-  durationTagText: {
-    color: '#c7cce3',
+  durationLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#9198b5',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  durationValue: {
+    fontSize: 16,
     fontWeight: '700',
+    color: '#c7cce3',
+  },
+  durationCaptionBold: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#c7cce3',
   },
   liveBadgeText: {
     fontSize: 11,
