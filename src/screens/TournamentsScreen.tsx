@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +33,17 @@ const STATUS = {
 const formatTimeControl = (initTime: number, increment: number): string =>
   `${initTime / 60000}+${increment / 1000}`;
 
+const formatDuration = (ms: number): string => {
+  const totalMinutes = ms / 60000;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) {
+    return `${minutes} min`;
+  }
+  const hourText = `${hours} hr`;
+  return minutes === 0 ? hourText : `${hourText} ${minutes} min`;
+};
+
 const formatDateShort = (ms: number): string =>
   new Date(ms).toLocaleString(undefined, {
     month: 'short',
@@ -40,41 +52,15 @@ const formatDateShort = (ms: number): string =>
     minute: '2-digit',
   });
 
-// Dev-only: injects extra tournaments (one of each status) into the list so
-// the screen can be styled without needing real upcoming/finished data.
-// Never persisted — flip off before shipping.
-const DEBUG_SHOW_FAKE_TOURNAMENTS = true;
-
-const DEBUG_TOURNAMENTS = [
-  {
-    id: 'debug-upcoming-1',
-    name: 'Winter Blitz Cup',
-    players: ['BlindFork', 'HarshB20000', 'kkr19', 'rajjayavant'],
-    startTime: Date.now() + 2 * 24 * 60 * 60 * 1000,
-    duration: 60 * 60 * 1000,
-    initTime: 180000,
-    increment: 1000,
-  },
-  {
-    id: 'debug-finished-1',
-    name: 'Rapid Showdown',
-    players: ['BlindFork', 'HarshB20000', 'kkr19', 'rajjayavant'],
-    startTime: Date.now() - 3 * 24 * 60 * 60 * 1000,
-    duration: 60 * 60 * 1000,
-    initTime: 600000,
-    increment: 5000,
-    leaderboard: [
-      { player: 'kkr19', points: 14 },
-      { player: 'rajjayavant', points: 10 },
-      { player: 'HarshB20000', points: 6 },
-      { player: 'BlindFork', points: 4 },
-    ],
-  },
-];
-
 export const TournamentsScreen = ({ navigation }: Props) => {
   const [tournaments, setTournaments] = useState<any[]>([]);
+  const [isListAtBottom, setIsListAtBottom] = useState(false);
   const { top } = useSafeAreaInsets();
+
+  const handleListScroll = (event: any) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    setIsListAtBottom(contentOffset.y + layoutMeasurement.height >= contentSize.height - 16);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -83,11 +69,7 @@ export const TournamentsScreen = ({ navigation }: Props) => {
         .then(() => importFeedTournaments())
         .then(() => {
           const loaded = DatabaseController.getInstance().getTournaments();
-          setTournaments(
-            DEBUG_SHOW_FAKE_TOURNAMENTS
-              ? [...loaded, ...DEBUG_TOURNAMENTS]
-              : loaded,
-          );
+          setTournaments(loaded);
           if (loaded[0]) {
             setLatestDataForTournament(loaded[0].id);
           }
@@ -108,9 +90,12 @@ export const TournamentsScreen = ({ navigation }: Props) => {
         <Text style={styles.headerTitle}>Tournaments</Text>
       </View>
 
+      <View style={styles.listWrapper}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
+        onScroll={handleListScroll}
+        scrollEventThrottle={16}
       >
         {tournaments.length === 0 ? (
           <Text style={styles.emptyText}>No tournaments yet</Text>
@@ -159,20 +144,27 @@ export const TournamentsScreen = ({ navigation }: Props) => {
                     </View>
                   </View>
 
-                  <Text style={styles.metaLine}>
-                    {tournament.players.length} PLAYERS
-                    {' · '}
-                    {formatTimeControl(
-                      tournament.initTime,
-                      tournament.increment,
-                    )}
-                  </Text>
+                  <View style={styles.metaRow}>
+                    <Text style={styles.metaLabel}>
+                      {tournament.players.length} PLAYERS
+                    </Text>
+                    <Text
+                      style={[
+                        styles.timeControlText,
+                        { color: status.accent },
+                      ]}
+                    >
+                      {formatTimeControl(
+                        tournament.initTime,
+                        tournament.increment,
+                      )}
+                    </Text>
+                  </View>
 
                   <View style={styles.scheduleRow}>
                     <View style={styles.scheduleItem}>
                       <Image source={calendarIcon} style={styles.scheduleIcon} />
                       <Text style={styles.scheduleText}>
-                        {isUpcoming ? 'Starts ' : isFinished ? 'Ended ' : 'Started '}
                         {formatDateShort(
                           isFinished ? endTime : tournament.startTime,
                         )}
@@ -181,7 +173,7 @@ export const TournamentsScreen = ({ navigation }: Props) => {
                     <View style={styles.scheduleItem}>
                       <Image source={clockIcon} style={styles.scheduleIcon} />
                       <Text style={styles.scheduleText}>
-                        {tournament.duration / 60000} min
+                        {formatDuration(tournament.duration)}
                       </Text>
                     </View>
                   </View>
@@ -244,6 +236,20 @@ export const TournamentsScreen = ({ navigation }: Props) => {
           })
         )}
       </ScrollView>
+      {!isListAtBottom && (
+        <View style={styles.listBottomFade} pointerEvents="none">
+          <Svg height="100%" width="100%">
+            <Defs>
+              <LinearGradient id="tournamentListFade" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#1c2238" stopOpacity="0" />
+                <Stop offset="1" stopColor="#1c2238" stopOpacity="1" />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#tournamentListFade)" />
+          </Svg>
+        </View>
+      )}
+      </View>
     </View>
   );
 };
@@ -277,12 +283,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fefefe',
   },
+  listWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
   scroll: {
     width: '100%',
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 32,
+  },
+  listBottomFade: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: normalizeHeight(72),
   },
   emptyText: {
     color: '#9aa2bd',
@@ -336,12 +353,22 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.5,
   },
-  metaLine: {
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
+  },
+  metaLabel: {
     fontSize: 11,
     fontWeight: '500',
     color: '#9198b5',
     letterSpacing: 0.5,
+    marginRight: 8,
+  },
+  timeControlText: {
+    fontFamily: 'RobotoMono-Regular',
+    fontSize: 13,
+    letterSpacing: 0.3,
   },
   scheduleRow: {
     flexDirection: 'row',
@@ -416,7 +443,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   pointsPillText: {
+    fontFamily: 'RobotoMono-Regular',
     fontSize: 13,
-    fontWeight: '700',
   },
 });
