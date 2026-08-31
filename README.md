@@ -90,21 +90,37 @@ Two devices, zero coordination, exactly one challenge sent every time.
    - the correct color and handicap FEN for that next pairing.
 4. **When the tournament's duration elapses**, it's archived with final standings, and every player's individual match history stays browsable from the results screen.
 
-## Project Structure
+## Getting Started
 
+### Prerequisites
+
+Make sure you have completed the [React Native environment setup](https://reactnative.dev/docs/set-up-your-environment).
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ChinmayKarnik/ChessTourney.git
+cd ChessTourney
 ```
-src/
-  data/controllers/   DatabaseController, LichessController
-  screens/            Home, Profile, Tournaments, Create/Upcoming/Ongoing/Finished, PlayerMatches
-  navigation/          React Navigation stack
-  utils/              tournament pairing/scoring/odds logic, date + formatting helpers
-```
 
-## Running Locally
-
-```sh
+2. Install dependencies:
+```bash
 npm install
-npm run android   # or: npm run ios (after `bundle install && bundle exec pod install`)
 ```
 
-See the [React Native environment setup guide](https://reactnative.dev/docs/set-up-your-environment) if you're setting up a device/emulator for the first time.
+### Running the App
+
+```bash
+npm run android
+```
+
+To run on iOS, install the pods first:
+```bash
+bundle install && bundle exec pod install
+npm run ios
+```
+
+## License
+
+This project is licensed under the MIT License.
