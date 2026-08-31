@@ -1,8 +1,18 @@
-# ChessTourney
+<p align="center">
+  <img src="src/screenshots/app-icon.png" width="100" />
+</p>
 
-A React Native app for running casual chess tournaments among friends — with skill-based handicaps and Lichess handling verification, match results, and live standings.
+<h1 align="center">ChessTourney</h1>
 
-The problem it solves: a casual friend group has wildly different ratings, so a plain round robin isn't fun for anyone. ChessTourney lets an organizer set up a tournament, hand out piece-odds handicaps per matchup so a 1200 and a 1800 can play a genuinely competitive game, and then tracks the whole thing — pairings, live points, match history — automatically from each player's real Lichess games.
+<p align="center">
+  <strong>Fair chess tournaments for mismatched friend groups.</strong><br/>
+  A mobile app for running casual chess tournaments with live standings and match history.<br/>
+  Built around piece-odds handicaps, so a 1200 and a 1800 can play a genuinely competitive game.
+</p>
+
+<br/>
+
+---
 
 ## Screenshots
 
@@ -22,6 +32,10 @@ The problem it solves: a casual friend group has wildly different ratings, so a 
     </td>
   </tr>
 </table>
+
+## Why ChessTourney?
+
+A casual friend group rarely has evenly matched ratings, so a plain round robin isn't fun for anyone. ChessTourney lets an organizer hand out piece-odds handicaps per matchup, so a 1200 and a 1800 can play a genuinely competitive game, then tracks pairings, live points, and match history automatically from each player's real Lichess games.
 
 ## Highlights
 
