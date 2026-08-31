@@ -12,17 +12,32 @@ const LIVE_ACCENT = '#34c759';
 const LIVE_BADGE_BG = '#1f6b3f';
 
 const TOURNAMENT_NAME = 'BlindFork Arena';
-const STARTED_AT = '4:45 PM';
-const ELAPSED = '00:24:52';
+const ENDS_AT = '5:30 PM';
+const DURATION = '45m';
+const REMAINING = '00:20:08';
 
 const LEADERBOARD = [
-  { player: 'BlindFork', points: 7 },
-  { player: 'kkr19', points: 4 },
-  { player: 'HarshB20000', points: 3 },
-  { player: 'rajjayavant', points: 1 },
+  { player: 'BlindFork', points: 9 },
+  { player: 'kkr19', points: 7 },
+  { player: 'ChessWizard88', points: 6 },
+  { player: 'HarshB20000', points: 6 },
+  { player: 'PawnStormer', points: 5 },
+  { player: 'e4Enjoyer', points: 4 },
+  { player: 'KnightRider22', points: 4 },
+  { player: 'SicilianSlayer', points: 3 },
+  { player: 'rajjayavant', points: 3 },
+  { player: 'RookiePlayer', points: 2 },
+  { player: 'TacticalTom', points: 2 },
+  { player: 'GMhopeful', points: 1 },
+  { player: 'EndgameEddie', points: 1 },
+  { player: 'CastleKing', points: 0 },
 ];
 
+const STANDINGS_PAGE_SIZE = 8;
+const STANDINGS_TOTAL_PAGES = Math.ceil(LEADERBOARD.length / STANDINGS_PAGE_SIZE);
+
 const NEXT_PAIRING = 'HarshB20000';
+const NEXT_PAIRING_COLOR = 'White';
 
 const ONGOING_MATCHES = [
   { player: 'kkr19', opponent: 'HarshB20000', speed: 'blitz', startedAt: '5:02 PM' },
@@ -47,26 +62,34 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.statusRow}>
-          <View style={styles.liveBadge}>
-            <Text style={styles.liveBadgeText}>LIVE</Text>
+        <View style={styles.statusCard}>
+          <View style={styles.statusSplitRow}>
+            <View style={styles.statusTimerBlock}>
+              <Text style={styles.timer}>{REMAINING}</Text>
+              <Text style={styles.timerLabel}>until {ENDS_AT}</Text>
+            </View>
+            <View style={styles.statusDivider} />
+            <View style={styles.statusMetaBlock}>
+              <View style={styles.metaTopRow}>
+                <View style={styles.liveBadge}>
+                  <Text style={styles.liveBadgeText}>LIVE</Text>
+                </View>
+                <View style={[styles.colorTag, styles.durationTag]}>
+                  <Text style={[styles.colorTagText, styles.durationTagText]}>{DURATION}</Text>
+                </View>
+              </View>
+            </View>
           </View>
-          <Text style={styles.startedText}>Started {STARTED_AT}</Text>
         </View>
 
-        <Text style={styles.timerLabel}>TIME ELAPSED</Text>
-        <Text style={styles.timer}>{ELAPSED}</Text>
-
-        <View style={styles.separator} />
-
-        <Text style={styles.sectionLabel}>STANDINGS</Text>
+        <Text style={[styles.sectionLabel, styles.standingsLabel]}>STANDINGS</Text>
         <View style={styles.card}>
-          {LEADERBOARD.map((entry, i) => (
+          {LEADERBOARD.slice(0, STANDINGS_PAGE_SIZE).map((entry, i) => (
             <View
               key={entry.player}
               style={[
                 styles.row,
-                i === LEADERBOARD.length - 1 && styles.rowLast,
+                i === STANDINGS_PAGE_SIZE - 1 && styles.rowLast,
               ]}
             >
               <View style={[styles.rankBadge, { backgroundColor: LIVE_ACCENT }]}>
@@ -84,15 +107,38 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
           ))}
         </View>
 
-        <View style={styles.idleBanner}>
-          <Text style={styles.idleText}>
-            You're idle — next pairing: {NEXT_PAIRING}
+        <View style={styles.pageNavRow}>
+          <TouchableOpacity
+            style={[styles.pageArrow, styles.pageArrowDisabled]}
+            disabled
+          >
+            <Text style={[styles.pageArrowText, styles.pageArrowTextDisabled]}>
+              {'<'}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.pageNavLabel}>
+            Page 1 of {STANDINGS_TOTAL_PAGES}
           </Text>
+          <TouchableOpacity style={styles.pageArrow}>
+            <Text style={styles.pageArrowText}>{'>'}</Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.ctaButton} onPress={() => {}}>
-          <Text style={styles.ctaButtonText}>Challenge {NEXT_PAIRING}</Text>
-        </TouchableOpacity>
+        <Text style={[styles.sectionLabel, styles.nextMatchLabel]}>NEXT MATCH</Text>
+        <View style={styles.nextMatchCard}>
+          <View style={styles.nextMatchHeader}>
+            <Text style={styles.nextMatchOpponent}>vs {NEXT_PAIRING}</Text>
+            <View style={styles.colorTag}>
+              <Text style={styles.colorTagText}>You: {NEXT_PAIRING_COLOR}</Text>
+            </View>
+          </View>
+          <Text style={styles.nextMatchHint}>
+            It's your move — send the challenge to start the game.
+          </Text>
+          <TouchableOpacity style={styles.ctaButton} onPress={() => {}}>
+            <Text style={styles.ctaButtonText}>Challenge {NEXT_PAIRING}</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={[styles.sectionLabel, styles.matchesLabel]}>ONGOING MATCHES</Text>
         {ONGOING_MATCHES.map(m => (
@@ -148,7 +194,31 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-  statusRow: {
+  statusCard: {
+    borderRadius: 12,
+    backgroundColor: '#252d47',
+    borderWidth: 1,
+    borderColor: '#3d4563',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  statusSplitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusTimerBlock: {
+    flex: 1,
+  },
+  statusDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#3d4563',
+    marginHorizontal: 16,
+  },
+  statusMetaBlock: {
+    alignItems: 'flex-start',
+  },
+  metaTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -157,7 +227,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    marginRight: 10,
+  },
+  durationTag: {
+    marginLeft: 6,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+  },
+  durationTagText: {
+    color: '#c7cce3',
+    fontWeight: '700',
   },
   liveBadgeText: {
     fontSize: 11,
@@ -165,29 +242,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.5,
   },
-  startedText: {
-    fontSize: 13,
-    color: '#9198b5',
-  },
   timerLabel: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#9198b5',
-    letterSpacing: 0.5,
-    marginTop: 18,
+    letterSpacing: 1,
+    marginTop: 2,
   },
   timer: {
     fontFamily: 'RobotoMono-Regular',
-    fontSize: 44,
-    letterSpacing: -1,
+    fontSize: 34,
+    letterSpacing: -0.5,
     color: LIVE_ACCENT,
-    marginTop: 4,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    marginTop: 20,
-    marginBottom: 20,
   },
   sectionLabel: {
     fontSize: 11,
@@ -195,6 +261,9 @@ const styles = StyleSheet.create({
     color: '#9198b5',
     letterSpacing: 0.5,
     marginBottom: 8,
+  },
+  standingsLabel: {
+    marginTop: 20,
   },
   card: {
     borderRadius: 12,
@@ -244,26 +313,81 @@ const styles = StyleSheet.create({
     fontFamily: 'RobotoMono-Regular',
     fontSize: 13,
   },
-  idleBanner: {
-    borderRadius: 10,
-    backgroundColor: 'rgba(212,175,55,0.12)',
-    borderLeftWidth: 3,
-    borderLeftColor: '#D4AF37',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 20,
+  pageNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
   },
-  idleText: {
+  pageArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#252d47',
+    borderWidth: 1,
+    borderColor: '#3d4563',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pageArrowDisabled: {
+    opacity: 0.4,
+  },
+  pageArrowText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#e7ebf5',
+  },
+  pageArrowTextDisabled: {
+    color: '#9198b5',
+  },
+  pageNavLabel: {
     fontSize: 13,
+    color: '#9198b5',
+    marginHorizontal: 16,
+  },
+  nextMatchLabel: {
+    marginTop: 24,
+  },
+  nextMatchCard: {
+    borderRadius: 12,
+    backgroundColor: '#252d47',
+    borderWidth: 1,
+    borderColor: '#3d4563',
+    padding: 14,
+  },
+  nextMatchHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  nextMatchOpponent: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#e7ebf5',
+  },
+  colorTag: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  colorTagText: {
+    fontSize: 11,
     fontWeight: '600',
-    color: '#e8cf7a',
+    color: '#9198b5',
+    letterSpacing: 0.3,
+  },
+  nextMatchHint: {
+    fontSize: 13,
+    color: '#9198b5',
+    marginTop: 6,
+    marginBottom: 14,
   },
   ctaButton: {
     backgroundColor: '#4f7ee8',
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 12,
   },
   ctaButtonText: {
     color: '#ffffff',
