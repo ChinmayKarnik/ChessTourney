@@ -14,6 +14,10 @@ The problem it solves: a casual friend group has wildly different ratings, so a 
 
 *Live tournament view — standings with per-player ratings and recent form, the next pairing with color assignment, and ongoing matches.*
 
+<img src="src/screenshots/player-matches.png" width="320" alt="Player matches screen" />
+
+*Individual player match history — every matchup with its result, time control, and time played, most recent first.*
+
 ## Highlights
 
 - **Piece-odds handicap matchmaking** — each matchup can carry its own handicap (e.g. "rook and knight odds"), defined by which of the stronger player's pieces are removed. The app derives the correct starting FEN for both colors so it's always the *giver's* pieces that come off, no matter which side they're assigned that game.

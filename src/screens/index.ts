@@ -7,3 +7,4 @@ export { FinishedTournamentScreen } from './FinishedTournamentScreen';
 export { TournamentsScreen } from './TournamentsScreen';
 export { CreateTournamentScreen } from './CreateTournamentScreen';
 export { PlayerMatchesScreen } from './PlayerMatchesScreen';
+export { PlayerMatchesScreenDebug } from './PlayerMatchesScreenDebug';
