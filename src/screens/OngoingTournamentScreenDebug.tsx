@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import whiteLeftArrow from '../images/white-left-arrow.png';
+import whiteRightArrow from '../images/white-right-arrow.png';
 import { normalize, normalizeWidth, normalizeHeight } from '../utils/normalize';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
@@ -11,7 +12,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'OngoingTournament'>;
 const LIVE_ACCENT = '#34c759';
 const LIVE_BADGE_BG = '#1f6b3f';
 
-const TOURNAMENT_NAME = 'BlindFork Arena';
+const TOURNAMENT_NAME = 'Winter Arena';
 const ENDS_AT = '5:30 PM';
 const DURATION = '45m';
 const REMAINING = '00:20:08';
@@ -33,14 +34,14 @@ const LEADERBOARD: { player: string; points: number; rating?: number; recent?: n
   { player: 'CastleKing', points: 0 },
 ];
 
-const STANDINGS_PAGE_SIZE = 8;
+const STANDINGS_PAGE_SIZE = 5;
 const STANDINGS_TOTAL_PAGES = Math.ceil(LEADERBOARD.length / STANDINGS_PAGE_SIZE);
 
-const NEXT_PAIRING = 'HarshB20000';
+const NEXT_PAIRING = 'kkr19';
 const NEXT_PAIRING_COLOR = 'White';
 
 const ONGOING_MATCHES = [
-  { player: 'kkr19', opponent: 'HarshB20000', speed: 'blitz', startedAt: '5:02 PM' },
+  { player: 'PawnStormer', opponent: 'BlindFork', speed: 'blitz', startedAt: '5:02 PM' },
 ];
 
 export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
@@ -125,42 +126,50 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
               <Text style={styles.points}>{entry.points}</Text>
             </View>
           ))}
-        </View>
-
-        <View style={styles.pageNavRow}>
-          <TouchableOpacity
-            style={[styles.pageArrow, styles.pageArrowDisabled]}
-            disabled
-          >
-            <Text style={[styles.pageArrowText, styles.pageArrowTextDisabled]}>
-              {'<'}
+          <View style={styles.paginationFooter}>
+            <TouchableOpacity disabled hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
+              <Image
+                style={[styles.pageChevronIcon, styles.pageChevronDisabled]}
+                source={whiteLeftArrow}
+              />
+            </TouchableOpacity>
+            <Text style={styles.pageFooterLabel}>
+              Page 1 of {STANDINGS_TOTAL_PAGES}
             </Text>
-          </TouchableOpacity>
-          <Text style={styles.pageNavLabel}>
-            Page 1 of {STANDINGS_TOTAL_PAGES}
-          </Text>
-          <TouchableOpacity style={styles.pageArrow}>
-            <Text style={styles.pageArrowText}>{'>'}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
+              <Image style={styles.pageChevronIcon} source={whiteRightArrow} />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <Text style={[styles.sectionLabel, styles.nextMatchLabel]}>NEXT MATCH</Text>
         <View style={styles.nextMatchCard}>
           <View style={styles.nextMatchHeader}>
-            <Text style={styles.nextMatchOpponent}>vs {NEXT_PAIRING}</Text>
+            <View>
+              <Text style={styles.nextMatchEyebrow}>NEXT OPPONENT</Text>
+              <Text style={styles.nextMatchOpponent}>{NEXT_PAIRING}</Text>
+            </View>
             <View style={styles.colorTag}>
-              <Text style={styles.colorTagText}>You: {NEXT_PAIRING_COLOR}</Text>
+              <View
+                style={[
+                  styles.colorDot,
+                  NEXT_PAIRING_COLOR === 'White'
+                    ? styles.colorDotWhite
+                    : styles.colorDotBlack,
+                ]}
+              />
+              <Text style={styles.colorTagText}>{NEXT_PAIRING_COLOR}</Text>
             </View>
           </View>
-          <Text style={styles.nextMatchHint}>
-            It's your move — send the challenge to start the game.
-          </Text>
+          <Text style={styles.nextMatchHint}>It's your move.</Text>
           <TouchableOpacity style={styles.ctaButton} onPress={() => {}}>
             <Text style={styles.ctaButtonText}>Challenge {NEXT_PAIRING}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={[styles.sectionLabel, styles.matchesLabel]}>ONGOING MATCHES</Text>
+        <View style={styles.matchesHeader}>
+          <Text style={styles.matchesTitle}>Ongoing Matches</Text>
+          <Text style={styles.matchesCount}>{ONGOING_MATCHES.length} live</Text>
+        </View>
         {ONGOING_MATCHES.map(m => (
           <View key={`${m.player}-${m.opponent}`} style={styles.matchRow}>
             <View style={styles.matchRowTop}>
@@ -348,7 +357,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontFamily: 'RobotoMono-Regular',
     fontSize: 11,
-    color: '#7d84a3',
+    color: '#9198b5',
   },
   formRow: {
     flexDirection: 'row',
@@ -374,42 +383,30 @@ const styles = StyleSheet.create({
     color: '#e7ebf5',
     marginRight: 8,
   },
-  pageNavRow: {
+  paginationFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
   },
-  pageArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: '#252d47',
-    borderWidth: 1,
-    borderColor: '#3d4563',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pageArrowDisabled: {
-    opacity: 0.4,
-  },
-  pageArrowText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#e7ebf5',
-  },
-  pageArrowTextDisabled: {
-    color: '#9198b5',
-  },
-  pageNavLabel: {
-    fontSize: 13,
-    color: '#9198b5',
+  pageChevronIcon: {
+    width: normalizeWidth(6),
+    height: normalizeWidth(6) * (86.0 / 51.0),
+    resizeMode: 'stretch',
     marginHorizontal: 16,
   },
-  nextMatchLabel: {
-    marginTop: 24,
+  pageChevronDisabled: {
+    opacity: 0.35,
+  },
+  pageFooterLabel: {
+    fontSize: 13,
+    color: '#9198b5',
+    marginHorizontal: 6,
   },
   nextMatchCard: {
+    marginTop: 24,
     borderRadius: 12,
     backgroundColor: '#252d47',
     borderWidth: 1,
@@ -421,28 +418,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  nextMatchEyebrow: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#9198b5',
+    letterSpacing: 0.8,
+    marginBottom: 3,
+  },
   nextMatchOpponent: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: '#e7ebf5',
   },
   colorTag: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
+  colorDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  colorDotWhite: {
+    backgroundColor: '#e7ebf5',
+  },
+  colorDotBlack: {
+    backgroundColor: '#1c2238',
+  },
   colorTagText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#9198b5',
-    letterSpacing: 0.3,
+    fontWeight: '700',
+    color: '#e7ebf5',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   nextMatchHint: {
     fontSize: 13,
     color: '#9198b5',
-    marginTop: 6,
-    marginBottom: 14,
+    marginTop: 8,
+    marginBottom: 12,
   },
   ctaButton: {
     backgroundColor: '#4f7ee8',
@@ -455,8 +476,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  matchesLabel: {
+  matchesHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     marginTop: 28,
+    marginBottom: 14,
+  },
+  matchesTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#e7ebf5',
+    letterSpacing: 0.2,
+  },
+  matchesCount: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#9198b5',
+    letterSpacing: 0.3,
   },
   matchRow: {
     borderRadius: 12,
