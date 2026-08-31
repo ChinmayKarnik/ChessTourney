@@ -10,15 +10,15 @@ The problem it solves: a casual friend group has wildly different ratings, so a 
   <tr>
     <td align="center" width="33%">
       <img src="src/screenshots/tournaments-list.png" width="260" alt="Tournament list screen" /><br/>
-      <strong>Tournaments List</strong>
+      Tournaments List
     </td>
     <td align="center" width="33%">
       <img src="src/screenshots/ongoing-tournament.png" width="260" alt="Ongoing tournament screen" /><br/>
-      <strong>Live Tournament</strong>
+      Live Tournament
     </td>
     <td align="center" width="33%">
       <img src="src/screenshots/player-matches.png" width="260" alt="Player matches screen" /><br/>
-      <strong>Player Scorecard</strong>
+      Player Scorecard
     </td>
   </tr>
 </table>
