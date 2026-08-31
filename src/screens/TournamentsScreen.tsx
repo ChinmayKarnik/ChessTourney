@@ -30,6 +30,14 @@ const STATUS = {
 const formatTimeControl = (initTime: number, increment: number): string =>
   `${initTime / 60000}+${increment / 1000}`;
 
+const formatDateShort = (ms: number): string =>
+  new Date(ms).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
 // Dev-only: injects extra tournaments (one of each status) into the list so
 // the screen can be styled without needing real upcoming/finished data.
 // Never persisted — flip off before shipping.
@@ -149,26 +157,69 @@ export const TournamentsScreen = ({ navigation }: Props) => {
                     </View>
                   </View>
 
-                  <Text style={styles.tournamentSubtitle}>
-                    {tournament.players.length} players •{' '}
-                    {formatTimeControl(tournament.initTime, tournament.increment)}
+                  <View style={styles.chipRow}>
+                    <View style={styles.chip}>
+                      <Text style={styles.chipText}>
+                        {tournament.players.length} players
+                      </Text>
+                    </View>
+                    <View style={styles.chip}>
+                      <Text style={styles.chipText}>
+                        {formatTimeControl(
+                          tournament.initTime,
+                          tournament.increment,
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.scheduleLine}>
+                    {isUpcoming ? 'Starts ' : isFinished ? 'Ended ' : 'Started '}
+                    {formatDateShort(
+                      isFinished ? endTime : tournament.startTime,
+                    )}
+                    {' · '}
+                    {tournament.duration / 60000} min
                   </Text>
 
                   <View style={styles.separator} />
 
                   {isUpcoming || topRows.length === 0 ? (
-                    <Text style={styles.infoLine}>
-                      Starts {new Date(tournament.startTime).toLocaleString()}
-                    </Text>
+                    <View style={styles.participantsRow}>
+                      {tournament.players.map((player: string) => (
+                        <View key={player} style={styles.participantChip}>
+                          <Text style={styles.participantChipText}>
+                            {player}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
                   ) : (
-                    topRows.map((entry: { player: string; points: number }) => (
-                      <View key={entry.player} style={styles.row}>
-                        <Text style={styles.rowLabel} numberOfLines={1}>
-                          {entry.player}
-                        </Text>
-                        <Text style={styles.rowValue}>{entry.points}</Text>
-                      </View>
-                    ))
+                    topRows.map(
+                      (entry: { player: string; points: number }, i: number) => (
+                        <View key={entry.player} style={styles.row}>
+                          <Text style={styles.rowRank}>{i + 1}</Text>
+                          <Text style={styles.rowLabel} numberOfLines={1}>
+                            {entry.player}
+                          </Text>
+                          <View
+                            style={[
+                              styles.pointsPill,
+                              { borderColor: status.accent },
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.pointsPillText,
+                                { color: status.accent },
+                              ]}
+                            >
+                              {entry.points}
+                            </Text>
+                          </View>
+                        </View>
+                      ),
+                    )
                   )}
                 </View>
               </TouchableOpacity>
@@ -268,10 +319,28 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.5,
   },
-  tournamentSubtitle: {
-    marginTop: 4,
-    fontSize: 13,
-    color: '#9aa2bd',
+  chipRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  chip: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginRight: 8,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#c7cce0',
+  },
+  scheduleLine: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#7a819c',
   },
   separator: {
     height: 1,
@@ -279,15 +348,32 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
   },
-  infoLine: {
-    fontSize: 14,
+  participantsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  participantChip: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  participantChipText: {
+    fontSize: 13,
     color: '#c7cce0',
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 5,
+  },
+  rowRank: {
+    width: 18,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6b7291',
   },
   rowLabel: {
     flex: 1,
@@ -295,9 +381,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#e7ebf5',
   },
-  rowValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#ffffff',
+  pointsPill: {
+    minWidth: 30,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  pointsPillText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
