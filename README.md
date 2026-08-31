@@ -1,97 +1,66 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# ChessTourney
 
-# Getting Started
+A React Native app for running casual chess tournaments among friends — with skill-based handicaps and Lichess handling verification, match results, and live standings.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+The problem it solves: a casual friend group has wildly different ratings, so a plain round robin isn't fun for anyone. ChessTourney lets an organizer set up a tournament, hand out piece-odds handicaps per matchup so a 1200 and a 1800 can play a genuinely competitive game, and then tracks the whole thing — pairings, live points, match history — automatically from each player's real Lichess games.
 
-## Step 1: Start Metro
+## Screenshots
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+<img src="src/screenshots/tournaments-list.png" width="320" alt="Tournament list screen" />
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+*Tournament list — live/upcoming/finished tournaments with time control, duration, and standings at a glance.*
 
-```sh
-# Using npm
-npm start
+## Highlights
 
-# OR using Yarn
-yarn start
+- **Piece-odds handicap matchmaking** — each matchup can carry its own handicap (e.g. "rook and knight odds"), defined by which of the stronger player's pieces are removed. The app derives the correct starting FEN for both colors so it's always the *giver's* pieces that come off, no matter which side they're assigned that game.
+- **Lichess-verified players** — joining a tournament requires a real Lichess username; it's checked against the Lichess API before it's accepted.
+- **Live standings from real games** — the app polls each player's Lichess game history for the tournament's time window and computes a live leaderboard: win/draw/loss scoring, an optional bonus for 3+ win streaks, and which matches are currently in progress.
+- **Deterministic pairing, no server** — next-opponent, color assignment, and handicap all fall out of a pure function over each player's match history, so every device in the tournament agrees without any backend to coordinate them.
+- **Shareable tournaments** — a tournament can be published to a public feed and auto-imported into everyone's app, so an organizer sets it up once for the whole group.
+
+## Technical Details
+
+Built with React Native/TypeScript, React Navigation, and AsyncStorage-backed persistence (`DatabaseController`) — no backend server. The interesting problems were all about making that work: encoding handicaps as data, turning them into a legal starting position, and getting two independent phones to agree on a match without ever talking to each other or to a server.
+
+### Modeling a handicap independently of color
+
+A handicap belongs to a *matchup*, not to a color — "BlindFork gives HarshB20000 rook-and-knight odds" is true regardless of who plays white on a given day. So each tournament stores an `oddsInfo` map keyed by the two players' sorted roster indices (`"0-1"`, `"0-2"`, ...), where each entry just names the **giver** and the pieces they remove, coded by their standard starting square (`Ra`/`Rh` for the rooks, `Nb`/`Ng` for the knights, `Q`, `Pa`-`Ph`, etc.). That coding is deliberately color-agnostic — `Nb` means "the queenside knight," full stop — because which side of the board the giver actually sits on changes every game (see below).
+
+### Generating the FEN
+
+At match time, `buildOddsFen` builds a completely standard starting position, then deletes the giver's listed pieces from whichever back rank/pawn rank that player has actually been assigned this game. Since the giver's color flips game to game, `getMatchFen` first resolves *which* color the giver is playing this time, then hands that off to `buildOddsFen` — so the same handicap definition mirrors correctly onto either the rank-1 or rank-8 starting pieces. The result is a normal, legal FEN that Lichess accepts like any other custom-position game; the app isn't doing anything Lichess doesn't already support, just computing the right input for it.
+
+### Pairing and color, without a server
+
+There's no backend coordinating who plays whom — every device independently runs the same pure functions (`getNextPairing`, `getMatchColor`) over that player's own fetched Lichess game history, so two phones with the same match history always derive the same next opponent and the same colors, with nothing to sync.
+
+That determinism is also what avoids the double-challenge problem. If both players' apps reacted to a new pairing by generating and opening a Lichess challenge link, you'd get two competing challenges fired at once. Instead, the deterministically-computed color doubles as an initiator flag: whoever's assigned **white** builds the full challenge link — opponent, FEN, time control, increment — and opens it, which sends a real challenge on Lichess; whoever's assigned **black** just opens `lichess.org` and waits, since accepting an incoming challenge needs no special link at all. Two devices, zero coordination, exactly one challenge sent every time.
+
+## How it works
+
+1. **Create a tournament** — pick a name, time control, start time, and roster (Lichess usernames). Optionally configure per-matchup piece-odds handicaps and a win-streak bonus.
+2. **Players get verified** — a username is only accepted after `LichessController` confirms the account exists on Lichess.
+3. **While it's live**, the app periodically re-fetches each player's Lichess games played during the tournament window, and recomputes:
+   - a points leaderboard (win = 2, draw = 1, loss = 0, with streak bonuses if enabled),
+   - who's idle and who they should be paired with next,
+   - the correct color and handicap FEN for that next pairing.
+4. **When the tournament's duration elapses**, it's archived with final standings, and every player's individual match history stays browsable from the results screen.
+
+## Project Structure
+
+```
+src/
+  data/controllers/   DatabaseController, LichessController
+  screens/            Home, Profile, Tournaments, Create/Upcoming/Ongoing/Finished, PlayerMatches
+  navigation/          React Navigation stack
+  utils/              tournament pairing/scoring/odds logic, date + formatting helpers
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+## Running Locally
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install
+npm run android   # or: npm run ios (after `bundle install && bundle exec pod install`)
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+See the [React Native environment setup guide](https://reactnative.dev/docs/set-up-your-environment) if you're setting up a device/emulator for the first time.
