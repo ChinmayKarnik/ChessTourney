@@ -38,6 +38,7 @@ A casual friend group rarely has evenly matched ratings, so a plain round robin 
 
 **Fair Matchmaking**
 - **Piece-odds handicaps**: give any matchup its own handicap, like rook and knight odds, and the app builds the correct starting position for both colors
+- **Same handicap, either color**: the handicap stays tied to the matchup, not a color, so it holds no matter who's assigned white that game
 
 **Live From Lichess**
 - **Lichess-verified players**: every username is checked against the Lichess API before it's accepted
