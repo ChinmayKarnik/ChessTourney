@@ -8,15 +8,15 @@ The problem it solves: a casual friend group has wildly different ratings, so a 
 
 <table>
   <tr>
-    <td align="center">
+    <td align="center" width="33%">
       <img src="src/screenshots/tournaments-list.png" width="260" alt="Tournament list screen" /><br/>
       <sub>Tournament list — live/upcoming/finished tournaments with time control, duration, and standings at a glance.</sub>
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <img src="src/screenshots/ongoing-tournament.png" width="260" alt="Ongoing tournament screen" /><br/>
       <sub>Live tournament view — standings with per-player ratings and recent form, the next pairing with color assignment, and ongoing matches.</sub>
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <img src="src/screenshots/player-matches.png" width="260" alt="Player matches screen" /><br/>
       <sub>Individual player match history — every matchup with its result, time control, and time played, most recent first.</sub>
     </td>
