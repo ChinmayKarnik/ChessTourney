@@ -6,7 +6,6 @@ import {
   ProfileScreen,
   UpcomingTournamentScreen,
   OngoingTournamentScreen,
-  OngoingTournamentScreenDebug,
   FinishedTournamentScreen,
   TournamentsScreen,
   CreateTournamentScreen,
@@ -29,10 +28,9 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const AppNavigator = () => {
   return (
     <NavigationContainer>
-      {/* Temporarily hardcoded to start on the debug screen for iteration — revert initialRouteName to "Home" afterward. */}
       <RootStack.Navigator
         screenOptions={{ headerShown: false }}
-        initialRouteName="OngoingTournament"
+        initialRouteName="Home"
       >
         <RootStack.Screen name="Home" component={HomeScreen} />
         <RootStack.Screen name="Profile" component={ProfileScreen} />
@@ -45,11 +43,9 @@ export const AppNavigator = () => {
           name="UpcomingTournament"
           component={UpcomingTournamentScreen}
         />
-        {/* Swapped to the debug component for screenshot purposes — revert to OngoingTournamentScreen afterward. */}
         <RootStack.Screen
           name="OngoingTournament"
-          component={OngoingTournamentScreenDebug}
-          initialParams={{ tournamentId: 'debug' }}
+          component={OngoingTournamentScreen}
         />
         <RootStack.Screen
           name="FinishedTournament"
