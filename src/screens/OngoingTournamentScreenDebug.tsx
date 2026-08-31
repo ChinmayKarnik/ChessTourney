@@ -16,15 +16,15 @@ const ENDS_AT = '5:30 PM';
 const DURATION = '45m';
 const REMAINING = '00:20:08';
 
-const LEADERBOARD = [
-  { player: 'BlindFork', points: 9 },
-  { player: 'kkr19', points: 7 },
-  { player: 'ChessWizard88', points: 6 },
-  { player: 'HarshB20000', points: 6 },
-  { player: 'PawnStormer', points: 5 },
-  { player: 'e4Enjoyer', points: 4 },
-  { player: 'KnightRider22', points: 4 },
-  { player: 'SicilianSlayer', points: 3 },
+const LEADERBOARD: { player: string; points: number; rating?: number; recent?: number[] }[] = [
+  { player: 'BlindFork', points: 9, rating: 1850, recent: [2, 2, 1, 2, 2] },
+  { player: 'kkr19', points: 7, rating: 1620, recent: [2, 0, 2, 1] },
+  { player: 'ChessWizard88', points: 6, rating: 1790, recent: [1, 2, 0, 2] },
+  { player: 'HarshB20000', points: 6, rating: 1554, recent: [0, 2, 2] },
+  { player: 'PawnStormer', points: 5, rating: 1488, recent: [2, 0, 1, 2, 0] },
+  { player: 'e4Enjoyer', points: 4, recent: [0, 1] },
+  { player: 'KnightRider22', points: 4, rating: 1702, recent: [0, 0, 2, 2] },
+  { player: 'SicilianSlayer', points: 3, recent: [1, 0, 0] },
   { player: 'rajjayavant', points: 3 },
   { player: 'RookiePlayer', points: 2 },
   { player: 'TacticalTom', points: 2 },
@@ -79,7 +79,10 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
           </View>
         </View>
 
-        <Text style={[styles.sectionLabel, styles.standingsLabel]}>STANDINGS</Text>
+        <View style={styles.standingsHeader}>
+          <Text style={styles.standingsTitle}>Standings</Text>
+          <Text style={styles.standingsCount}>{LEADERBOARD.length} players</Text>
+        </View>
         <View style={styles.card}>
           {LEADERBOARD.slice(0, STANDINGS_PAGE_SIZE).map((entry, i) => (
             <View
@@ -89,17 +92,37 @@ export const OngoingTournamentScreenDebug = ({ navigation }: Props) => {
                 i === STANDINGS_PAGE_SIZE - 1 && styles.rowLast,
               ]}
             >
-              <View style={[styles.rankBadge, { backgroundColor: LIVE_ACCENT }]}>
-                <Text style={styles.rankBadgeText}>{i + 1}</Text>
+              <Text style={styles.rank}>{i + 1}</Text>
+              <View style={styles.rowMain}>
+                <View style={styles.rowNameLine}>
+                  <Text style={styles.rowLabel} numberOfLines={1}>
+                    {entry.player}
+                  </Text>
+                  {entry.rating != null && (
+                    <Text style={styles.ratingText}>{entry.rating}</Text>
+                  )}
+                </View>
+                {entry.recent && (
+                  <View style={styles.formRow}>
+                    {entry.recent.map((score, idx) => (
+                      <Text
+                        key={idx}
+                        style={[
+                          styles.formScore,
+                          score >= 2
+                            ? styles.formWin
+                            : score === 1
+                            ? styles.formDraw
+                            : styles.formLoss,
+                        ]}
+                      >
+                        {score}
+                      </Text>
+                    ))}
+                  </View>
+                )}
               </View>
-              <Text style={styles.rowLabel} numberOfLines={1}>
-                {entry.player}
-              </Text>
-              <View style={[styles.pointsPill, { borderColor: LIVE_ACCENT }]}>
-                <Text style={[styles.pointsPillText, { color: LIVE_ACCENT }]}>
-                  {entry.points}
-                </Text>
-              </View>
+              <Text style={styles.points}>{entry.points}</Text>
             </View>
           ))}
         </View>
@@ -226,12 +249,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  durationCaption: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#9198b5',
-    letterSpacing: 0.3,
-  },
   durationLabel: {
     fontSize: 10,
     fontWeight: '600',
@@ -241,11 +258,6 @@ const styles = StyleSheet.create({
   },
   durationValue: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#c7cce3',
-  },
-  durationCaptionBold: {
-    fontSize: 14,
     fontWeight: '700',
     color: '#c7cce3',
   },
@@ -275,8 +287,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 8,
   },
-  standingsLabel: {
+  standingsHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     marginTop: 20,
+    marginBottom: 8,
+  },
+  standingsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#e7ebf5',
+    letterSpacing: 0.2,
+  },
+  standingsCount: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#9198b5',
+    letterSpacing: 0.3,
   },
   card: {
     borderRadius: 12,
@@ -288,43 +316,63 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   rowLast: {
     borderBottomWidth: 0,
   },
-  rankBadge: {
+  rank: {
     width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#7d84a3',
     marginRight: 10,
   },
-  rankBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1c2238',
+  rowMain: {
+    flex: 1,
+    marginRight: 10,
+  },
+  rowNameLine: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
   },
   rowLabel: {
-    flex: 1,
-    marginRight: 8,
     fontSize: 15,
+    fontWeight: '600',
     color: '#e7ebf5',
+    marginRight: 6,
+    flexShrink: 1,
   },
-  pointsPill: {
-    minWidth: 30,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  pointsPillText: {
+  ratingText: {
     fontFamily: 'RobotoMono-Regular',
-    fontSize: 13,
+    fontSize: 11,
+    color: '#7d84a3',
+  },
+  formRow: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  formScore: {
+    fontFamily: 'RobotoMono-Regular',
+    fontSize: 15,
+    marginRight: 9,
+  },
+  formWin: {
+    color: LIVE_ACCENT,
+  },
+  formDraw: {
+    color: '#9198b5',
+  },
+  formLoss: {
+    color: '#c96a6a',
+  },
+  points: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#e7ebf5',
+    marginRight: 8,
   },
   pageNavRow: {
     flexDirection: 'row',
