@@ -82,13 +82,13 @@ Two devices, zero coordination, exactly one challenge sent every time.
 
 ## How it works
 
-1. **Create a tournament** — pick a name, time control, start time, and roster (Lichess usernames). Optionally configure per-matchup piece-odds handicaps and a win-streak bonus.
-2. **Players get verified** — a username is only accepted after `LichessController` confirms the account exists on Lichess.
-3. **While it's live**, the app periodically re-fetches each player's Lichess games played during the tournament window, and recomputes:
-   - a points leaderboard (win = 2, draw = 1, loss = 0, with streak bonuses if enabled),
-   - who's idle and who they should be paired with next,
-   - the correct color and handicap FEN for that next pairing.
-4. **When the tournament's duration elapses**, it's archived with final standings, and every player's individual match history stays browsable from the results screen.
+1. **Create a tournament**: pick a name, time control, start time, and roster (Lichess usernames). Optionally configure per-matchup piece-odds handicaps and a win-streak bonus.
+2. **Players get verified**: a username is only accepted after `LichessController` confirms the account exists on Lichess.
+3. **While it's live**, the app periodically re-fetches each player's Lichess games and recomputes:
+   - a points leaderboard (win = 2, draw = 1, loss = 0, with streak bonuses if enabled)
+   - who's idle and who they should be paired with next
+   - the correct color and handicap FEN for that next pairing
+4. **When it ends**, the tournament is archived with final standings, and every player's match history stays browsable from the results screen.
 
 ## Getting Started
 
