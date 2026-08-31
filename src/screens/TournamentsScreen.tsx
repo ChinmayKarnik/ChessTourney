@@ -10,6 +10,8 @@ import {
   setLatestDataForTournament,
 } from '../utils/tournamentUtils';
 import whiteLeftArrow from '../images/white-left-arrow.png';
+import calendarIcon from '../images/calendar.png';
+import clockIcon from '../images/clock-thick-white.png';
 import { normalize, normalizeWidth, normalizeHeight } from '../utils/normalize';
 
 type TournamentsScreenNavigationProp = NativeStackNavigationProp<
@@ -157,48 +159,63 @@ export const TournamentsScreen = ({ navigation }: Props) => {
                     </View>
                   </View>
 
-                  <View style={styles.chipRow}>
-                    <View style={styles.chip}>
-                      <Text style={styles.chipText}>
-                        {tournament.players.length} players
+                  <Text style={styles.metaLine}>
+                    {tournament.players.length} PLAYERS
+                    {' · '}
+                    {formatTimeControl(
+                      tournament.initTime,
+                      tournament.increment,
+                    )}
+                  </Text>
+
+                  <View style={styles.scheduleRow}>
+                    <View style={styles.scheduleItem}>
+                      <Image source={calendarIcon} style={styles.scheduleIcon} />
+                      <Text style={styles.scheduleText}>
+                        {isUpcoming ? 'Starts ' : isFinished ? 'Ended ' : 'Started '}
+                        {formatDateShort(
+                          isFinished ? endTime : tournament.startTime,
+                        )}
                       </Text>
                     </View>
-                    <View style={styles.chip}>
-                      <Text style={styles.chipText}>
-                        {formatTimeControl(
-                          tournament.initTime,
-                          tournament.increment,
-                        )}
+                    <View style={styles.scheduleItem}>
+                      <Image source={clockIcon} style={styles.scheduleIcon} />
+                      <Text style={styles.scheduleText}>
+                        {tournament.duration / 60000} min
                       </Text>
                     </View>
                   </View>
 
-                  <Text style={styles.scheduleLine}>
-                    {isUpcoming ? 'Starts ' : isFinished ? 'Ended ' : 'Started '}
-                    {formatDateShort(
-                      isFinished ? endTime : tournament.startTime,
-                    )}
-                    {' · '}
-                    {tournament.duration / 60000} min
-                  </Text>
-
                   <View style={styles.separator} />
 
                   {isUpcoming || topRows.length === 0 ? (
-                    <View style={styles.participantsRow}>
-                      {tournament.players.map((player: string) => (
-                        <View key={player} style={styles.participantChip}>
-                          <Text style={styles.participantChipText}>
-                            {player}
-                          </Text>
+                    tournament.players.map((player: string) => (
+                      <View key={player} style={styles.row}>
+                        <View style={styles.rankBadgeSlot}>
+                          <View
+                            style={[
+                              styles.rankDot,
+                              { backgroundColor: status.accent },
+                            ]}
+                          />
                         </View>
-                      ))}
-                    </View>
+                        <Text style={styles.rowLabel} numberOfLines={1}>
+                          {player}
+                        </Text>
+                      </View>
+                    ))
                   ) : (
                     topRows.map(
                       (entry: { player: string; points: number }, i: number) => (
                         <View key={entry.player} style={styles.row}>
-                          <Text style={styles.rowRank}>{i + 1}</Text>
+                          <View
+                            style={[
+                              styles.rankBadge,
+                              { backgroundColor: status.accent },
+                            ]}
+                          >
+                            <Text style={styles.rankBadgeText}>{i + 1}</Text>
+                          </View>
                           <Text style={styles.rowLabel} numberOfLines={1}>
                             {entry.player}
                           </Text>
@@ -319,28 +336,34 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.5,
   },
-  chipRow: {
+  metaLine: {
+    marginTop: 10,
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#9198b5',
+    letterSpacing: 0.5,
+  },
+  scheduleRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
   },
-  chip: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginRight: 8,
+  scheduleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
   },
-  chipText: {
-    fontSize: 12,
+  scheduleIcon: {
+    width: 12,
+    height: 12,
+    marginRight: 5,
+    tintColor: '#dde1f2',
+    resizeMode: 'contain',
+  },
+  scheduleText: {
+    fontSize: 13,
     fontWeight: '600',
-    color: '#c7cce0',
-  },
-  scheduleLine: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#7a819c',
+    color: '#dde1f2',
   },
   separator: {
     height: 1,
@@ -348,32 +371,35 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
   },
-  participantsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  participantChip: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  participantChipText: {
-    fontSize: 13,
-    color: '#c7cce0',
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 5,
+    paddingVertical: 6,
   },
-  rowRank: {
-    width: 18,
-    fontSize: 13,
+  rankBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  rankBadgeText: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#6b7291',
+    color: '#1c2238',
+  },
+  rankBadgeSlot: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  rankDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   rowLabel: {
     flex: 1,
